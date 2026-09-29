@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Safelink Control Center</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        zinc: {
+                            850: '#141417',
+                            950: '#09090b',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts, Lucide Icons, and Chart.js CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #e4e4e7;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .flat-card {
+            background-color: #121215;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+
+        .tab-active {
+            background-color: #18181b;
+            color: #10b981;
+            border-left: 3px solid #10b981;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col antialiased selection:bg-zinc-800 selection:text-emerald-400">
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- MAIN DASHBOARD CONTAINER -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-64 bg-zinc-900/80 border-r border-zinc-800 flex flex-col justify-between shrink-0 hidden md:flex">
+            <div class="p-5 space-y-6">
+                <!-- LOGO BRANDING -->
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-mono font-bold text-lg shadow-lg shadow-emerald-500/20">
+                        /&gt;
+                    </div>
+                    <div>
+                        <div class="font-mono font-bold text-sm tracking-tight text-white flex items-center gap-1.5">
+                            GATEWAY<span class="text-emerald-400">_ADMIN</span>
+                        </div>
+                        <div class="text-[10px] font-mono text-zinc-500">SAFELINK CONTROL PANEL</div>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION ITEMS -->
+                <nav class="space-y-1 font-mono text-xs">
+                    <button type="button" onclick="switchTab('tab-overview')" id="nav-tab-overview" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition tab-active">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>Dashboard Utama</span>
+                    </button>
+
+                    <button type="button" onclick="switchTab('tab-links')" id="nav-tab-links" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="link" class="w-4 h-4"></i>
+                        <span>Kelola File & Link</span>
+                    </button>
+
+                    <button type="button" onclick="switchTab('tab-analytics')" id="nav-tab-analytics" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="line-chart" class="w-4 h-4"></i>
+                        <span>Grafik & Analitik</span>
+                    </button>
+
+                    <button type="button" onclick="switchTab('tab-ads')" id="nav-tab-ads" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                        <span>Monetisasi (Adsterra)</span>
+                    </button>
+
+                    <button type="button" onclick="switchTab('tab-settings')" id="nav-tab-settings" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        <span>Pengaturan Sistem</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- SIDEBAR FOOTER -->
+            <div class="p-4 border-t border-zinc-800 space-y-3 font-mono text-xs">
+                <div class="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-zinc-500">GATEWAY_STATUS</span>
+                        <span class="text-emerald-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                        </span>
+                    </div>
+                    <div class="text-[10px] text-zinc-400">Safelink Gate: index.html</div>
+                </div>
+
+                <a href="index.html" target="_blank" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded flex items-center justify-center gap-2 transition text-xs">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span>Buka Halaman Safelink</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+            <!-- TOP NAVBAR -->
+            <header class="h-16 border-b border-zinc-800 bg-zinc-900/50 px-6 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="toggleMobileMenu()" class="md:hidden text-zinc-400 hover:text-white">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <h1 id="page-title-display" class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-emerald-400"></i>
+                        <span>DASHBOARD OVERVIEW</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="openAddLinkModal()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center gap-2 transition shadow-lg shadow-emerald-950/40">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>Tambah Link Baru</span>
+                    </button>
+
+                    <button type="button" onclick="refreshDashboardData()" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition" title="Refresh Data">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTENT DISPLAY CONTAINER -->
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+
+                <!-- ================= TAB 1: OVERVIEW ================= -->
+                <div id="tab-overview" class="space-y-6 fade-in">
+                    
+                    <!-- TOP METRICS CARDS GRID -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        <!-- CARD 1: TOTAL DOWNLOADS -->
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>TOTAL DOWNLOAD</span>
+                                <i data-lucide="download" class="w-4 h-4 text-emerald-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-total-downloads" class="text-2xl font-bold font-mono text-white">12,845</span>
+                                <span class="text-[11px] font-mono text-emerald-400 font-bold">+18.4%</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">Diunduh dari semua file</div>
+                        </div>
+
+                        <!-- CARD 2: ACTIVE SAFELINKS -->
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>TOTAL LINK AKTIF</span>
+                                <i data-lucide="link" class="w-4 h-4 text-blue-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-active-links" class="text-2xl font-bold font-mono text-white">48</span>
+                                <span class="text-[11px] font-mono text-blue-400 font-bold">+5 Baru</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">Tautan terhubung di gateway</div>
+                        </div>
+
+                        <!-- CARD 3: ESTIMATED REVENUE -->
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>ESTIMASI EARNING (CPM)</span>
+                                <i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-total-earnings" class="text-2xl font-bold font-mono text-white">$142.60</span>
+                                <span class="text-[11px] font-mono text-amber-400 font-bold">eCPM $3.70</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">Berdasarkan impresi iklan 3-step</div>
+                        </div>
+
+                        <!-- CARD 4: CONVERSION RATE -->
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>COMPLETION RATE</span>
+                                <i data-lucide="check-circle" class="w-4 h-4 text-purple-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-completion-rate" class="text-2xl font-bold font-mono text-white">84.2%</span>
+                                <span class="text-[11px] font-mono text-purple-400 font-bold">Low Drop-off</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">Selesai hingga Step 3</div>
+                        </div>
+
+                    </div>
+
+                    <!-- CHARTS GRID ROW 1 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        
+                        <!-- MAIN LINE CHART: DOWNLOADS & IMPRESSIONS TREND -->
+                        <div class="lg:col-span-8 flat-card p-5 space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+                                <div>
+                                    <h3 class="font-mono font-bold text-sm text-zinc-200">Tren Download & Impresi Iklan (7 Hari Terakhir)</h3>
+                                    <p class="text-xs text-zinc-500 font-mono">Perbandingan klik safelink dan impresi iklan bertingkat</p>
+                                </div>
+                                <div class="flex gap-2 font-mono text-xs">
+                                    <span class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Downloads</span>
+                                    <span class="px-2 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">Impresi Iklan</span>
+                                </div>
+                            </div>
+                            <div class="h-64 sm:h-72 w-full">
+                                <canvas id="chartDownloadsTrend"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- DOUGHNUT CHART: MULTI-STEP CONVERSION BREAKDOWN -->
+                        <div class="lg:col-span-4 flat-card p-5 space-y-4">
+                            <div class="border-b border-zinc-800 pb-3">
+                                <h3 class="font-mono font-bold text-sm text-zinc-200">Konversi Step 1 - Step 3</h3>
+                                <p class="text-xs text-zinc-500 font-mono">Analisis retensi pengunjung pada tiap tahap</p>
+                            </div>
+                            <div class="h-56 w-full flex items-center justify-center">
+                                <canvas id="chartStepConversion"></canvas>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-center font-mono text-[11px] pt-2 border-t border-zinc-800">
+                                <div>
+                                    <div class="text-amber-400 font-bold">100%</div>
+                                    <div class="text-zinc-500">Step 1</div>
+                                </div>
+                                <div>
+                                    <div class="text-blue-400 font-bold">91.5%</div>
+                                    <div class="text-zinc-500">Step 2</div>
+                                </div>
+                                <div>
+                                    <div class="text-emerald-400 font-bold">84.2%</div>
+                                    <div class="text-zinc-500">Step 3 Final</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- RECENT FILE DOWNLOADS SUMMARY TABLE -->
+                    <div class="flat-card p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                            <h3 class="font-mono font-bold text-sm text-zinc-200 flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Top 5 File Paling Banyak Diunduh</span>
+                            </h3>
+                            <button type="button" onclick="switchTab('tab-links')" class="text-xs font-mono text-emerald-400 hover:underline">
+                                Lihat Semua File &rarr;
+                            </button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-mono text-xs">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-zinc-500 uppercase">
+                                        <th class="pb-2">Nama Berkas</th>
+                                        <th class="pb-2">Total Download</th>
+                                        <th class="pb-2">Estimasi Earning</th>
+                                        <th class="pb-2">Status</th>
+                                        <th class="pb-2 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overview-top-files-tbody" class="divide-y divide-zinc-800/60 text-zinc-300">
+                                    <!-- Dynamic Top Files HTML injected here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 2: MANAGE LINKS ================= -->
+                <div id="tab-links" class="space-y-6 hidden fade-in">
+                    
+                    <!-- SEARCH & FILTER TOOLBAR -->
+                    <div class="flat-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="relative w-full sm:w-80">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+                            <input type="text" id="link-search-input" onkeyup="filterLinksTable()" placeholder="Cari nama file / URL..." class="w-full bg-zinc-950 border border-zinc-800 rounded pl-9 pr-3 py-2 text-xs font-mono text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                        </div>
+
+                        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                            <select id="link-status-filter" onchange="filterLinksTable()" class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-zinc-300 focus:border-emerald-500 focus:outline-none">
+                                <option value="ALL">Semua Status</option>
+                                <option value="ACTIVE">Aktif</option>
+                                <option value="PAUSED">Nonaktif</option>
+                            </select>
+
+                            <button type="button" onclick="openAddLinkModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center gap-1.5 transition shrink-0">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span>Tambah File</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FULL LINKS MANAGEMENT TABLE -->
+                    <div class="flat-card p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                            <h3 class="font-mono font-bold text-sm text-zinc-200">Daftar Semua Tautan Safelink (<span id="total-link-count">0</span>)</h3>
+                            <span class="text-xs font-mono text-zinc-500">Tersimpan di Local Database</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-mono text-xs">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-zinc-500 uppercase">
+                                        <th class="pb-3">ID / Tanggal</th>
+                                        <th class="pb-3">Nama Berkas</th>
+                                        <th class="pb-3">Target URL Original</th>
+                                        <th class="pb-3">Jumlah Download</th>
+                                        <th class="pb-3">Estimasi CPM</th>
+                                        <th class="pb-3">Status</th>
+                                        <th class="pb-3 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="links-management-tbody" class="divide-y divide-zinc-800/60 text-zinc-300">
+                                    <!-- Dynamic Link Items injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 3: ANALYTICS ================= -->
+                <div id="tab-analytics" class="space-y-6 hidden fade-in">
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- BAR CHART: TOP DOWNLOADED FILES DISTRIBUTION -->
+                        <div class="flat-card p-5 space-y-4">
+                            <div class="border-b border-zinc-800 pb-3">
+                                <h3 class="font-mono font-bold text-sm text-zinc-200">5 File Teratas Berdasarkan Unduhan</h3>
+                                <p class="text-xs text-zinc-500 font-mono">Volume unduhan kumulatif per berkas</p>
+                            </div>
+                            <div class="h-64 w-full">
+                                <canvas id="chartTopFilesBar"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- PIE CHART: TRAFFIC ORIGIN DISTRIBUTION -->
+                        <div class="flat-card p-5 space-y-4">
+                            <div class="border-b border-zinc-800 pb-3">
+                                <h3 class="font-mono font-bold text-sm text-zinc-200">Sumber Traffic Pengunjung (Referrer)</h3>
+                                <p class="text-xs text-zinc-500 font-mono">Asal kedatangan pengguna yang membuka link</p>
+                            </div>
+                            <div class="h-64 w-full flex items-center justify-center">
+                                <canvas id="chartTrafficOrigin"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ANALYTICS SUMMARY BOX -->
+                    <div class="flat-card p-5 space-y-3 font-mono text-xs">
+                        <h4 class="font-bold text-zinc-200 uppercase tracking-wide flex items-center gap-2">
+                            <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i>
+                            <span>Laporan Performa & Statistik Trafik Gateway</span>
+                        </h4>
+                        <p class="text-zinc-400 leading-relaxed">
+                            Berdasarkan data 30 hari terakhir, eCPM rata-rata iklan Adsterra berada pada kisaran <strong>$3.50 - $4.20</strong> per 1.000 tampilan penuh (3-Step). Penggunaan 3-step countdown terbukti meningkatkan jumlah impresi iklan hingga <strong>280%</strong> dibanding metode 1-halaman tradisional tanpa menurunkan tingkat penyelesaian unduhan secara signifikan.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 4: ADSTERRA CONFIG ================= -->
+                <div id="tab-ads" class="space-y-6 hidden fade-in">
+                    
+                    <div class="flat-card p-6 space-y-6 max-w-4xl">
+                        <div class="border-b border-zinc-800 pb-3 space-y-1">
+                            <h3 class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
+                                <i data-lucide="dollar-sign" class="w-5 h-5 text-amber-400"></i>
+                                <span>Pengaturan Unit Iklan Adsterra & Monetisasi</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400 font-mono">
+                                Masukkan URL Smartlink dan kode script iklan Adsterra Anda di sini. Pengaturan ini akan disinkronkan ke file `index.html`.
+                            </p>
+                        </div>
+
+                        <form id="adsterra-config-form" onsubmit="saveAdsterraConfig(event)" class="space-y-4 font-mono text-xs">
+                            <div>
+                                <label class="block text-zinc-300 font-bold mb-1">1. Smartlink URL Adsterra (Pemicu Klik Step 1, 2, & 3)</label>
+                                <input type="url" id="admin-cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
+                                <p class="text-[10px] text-zinc-500 mt-1">Smartlink ini otomatis dibuka di tab baru saat pengunjung menekan tombol verifikasi.</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-zinc-300 font-bold mb-1">2. Banner 728x90 (Header & Footer)</label>
+                                    <textarea id="admin-cfg-banner-header" rows="4" placeholder="<script type='text/javascript' src='//...;'></script>" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-zinc-300 font-bold mb-1">3. Banner 300x250 (Action Zone)</label>
+                                    <textarea id="admin-cfg-banner-middle" rows="4" placeholder="<script type='text/javascript' src='//...;'></script>" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-zinc-300 font-bold mb-1">4. Script Pop-Under Adsterra</label>
+                                <textarea id="admin-cfg-popunder" rows="3" placeholder="<script type='text/javascript' src='//...;'></script>" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                            </div>
+
+                            <div class="pt-3 border-t border-zinc-800 flex justify-end">
+                                <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded flex items-center gap-2 transition">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Simpan Konfigurasi Iklan</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- ================= TAB 5: SYSTEM SETTINGS ================= -->
+                <div id="tab-settings" class="space-y-6 hidden fade-in">
+                    
+                    <div class="flat-card p-6 space-y-6 max-w-3xl">
+                        <div class="border-b border-zinc-800 pb-3 space-y-1">
+                            <h3 class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
+                                <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i>
+                                <span>Pengaturan Gateway Safelink</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400 font-mono">
+                                Konfigurasi durasi hitung mundur, nama domain safelink, dan pemeliharaan data.
+                            </p>
+                        </div>
+
+                        <form id="system-settings-form" onsubmit="saveSystemSettings(event)" class="space-y-4 font-mono text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-zinc-300 mb-1 font-bold">Durasi Timer per Step (Detik)</label>
+                                    <input type="number" id="sys-timer-duration" value="10" min="3" max="60" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-blue-500 focus:outline-none">
+                                </div>
+
+                                <div>
+                                    <label class="block text-zinc-300 mb-1 font-bold">Estimasi Rates eCPM ($)</label>
+                                    <input type="number" step="0.1" id="sys-ecpm-rate" value="3.70" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-blue-500 focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-zinc-300 mb-1 font-bold">URL Domain Safelink Gate Utama</label>
+                                <input type="url" id="sys-gateway-url" placeholder="https://domain-safelink-anda.com/index.html" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-blue-500 focus:outline-none">
+                                <p class="text-[10px] text-zinc-500 mt-1">Gunakan URL tempat file `index.html` safelink dihosting.</p>
+                            </div>
+
+                            <div class="pt-4 border-t border-zinc-800 flex items-center justify-between">
+                                <button type="button" onclick="resetAllDataConfirm()" class="px-3 py-2 bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-800 rounded text-xs transition">
+                                    Reset Semua Data Safelink
+                                </button>
+
+                                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded flex items-center gap-2 transition">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Simpan Pengaturan</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+    <!-- MODAL: TAMBAH LINK BARU / LINK GENERATOR -->
+    <div id="modal-add-link" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="flat-card max-w-lg w-full p-6 space-y-4 border border-zinc-700">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div class="flex items-center gap-2 font-mono font-bold text-white text-sm">
+                    <i data-lucide="link-2" class="w-4 h-4 text-emerald-400"></i>
+                    <span>TAMBAH FILE DOWNLOAD & SAFELINK</span>
+                </div>
+                <button type="button" onclick="closeAddLinkModal()" class="text-zinc-400 hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleCreateNewLink(event)" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">Nama File / Berkas *</label>
+                    <input type="text" id="modal-file-name" required placeholder="Contoh: Photoshop_2026_Full_Crack.zip" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">URL Download Asli (Google Drive / MediaFire / Mega / CDN) *</label>
+                    <input type="url" id="modal-target-url" required placeholder="https://drive.google.com/file/d/123456/view" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">Ukuran File / Kategori (Opsional)</label>
+                    <input type="text" id="modal-file-size" placeholder="14.8 MB • Software" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t border-zinc-800">
+                    <button type="button" onclick="closeAddLinkModal()" class="px-4 py-2 bg-zinc-800 text-zinc-300 rounded">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Generate & Simpan Link</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIRM DELETE DIALOG (REPLACES NATIVE ALERT) -->
+    <div id="modal-confirm-delete" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="flat-card max-w-sm w-full p-5 space-y-4 border border-red-800/60 text-center font-mono">
+            <div class="w-12 h-12 rounded-full bg-red-950 text-red-400 border border-red-800 flex items-center justify-center mx-auto">
+                <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="font-bold text-white text-sm">Hapus Link Safelink Ini?</h3>
+                <p class="text-xs text-zinc-400">Tautan safelink ini akan dihapus dari basis data admin.</p>
+            </div>
+            <div class="flex gap-2 justify-center pt-2">
+                <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 bg-zinc-800 text-zinc-300 rounded text-xs">Batal</button>
+                <button type="button" id="btn-confirm-delete-action" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded text-xs">Ya, Hapus Sekarang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CORE DASHBOARD LOGIC SCRIPT -->
+    <script>
+        // Database key constants
+        const DB_KEY_LINKS = 'safelink_db_links_v1';
+        const DB_KEY_SETTINGS = 'safelink_db_settings_v1';
+
+        // Sample Seed Data (Used if database is empty initially)
+        const initialSeedLinks = [
+            { id: 'lnk_101', name: 'Adobe_Photoshop_2026_Full.zip', originalUrl: 'https://drive.google.com/file/d/1A2B3C4D5E/view', downloads: 4820, date: '2026-03-01', status: 'ACTIVE', size: '1.4 GB' },
+            { id: 'lnk_102', name: 'GTA_V_Mod_Pack_v4.rar', originalUrl: 'https://mediafire.com/file/gtav_mod.rar', downloads: 3120, date: '2026-03-02', status: 'ACTIVE', size: '450 MB' },
+            { id: 'lnk_103', name: 'Ebook_Python_Automation_2026.pdf', originalUrl: 'https://mega.nz/file/python_ebook.pdf', downloads: 2190, date: '2026-03-05', status: 'ACTIVE', size: '18 MB' },
+            { id: 'lnk_104', name: 'Windows_11_Pro_Activator.zip', originalUrl: 'https://drive.google.com/file/d/9Z8Y7X6W5V/view', downloads: 1840, date: '2026-03-10', status: 'ACTIVE', size: '8.2 MB' },
+            { id: 'lnk_105', name: 'Film_4K_HDR_Sample_Trailer.mp4', originalUrl: 'https://mediafire.com/file/sample_4k.mp4', downloads: 875, date: '2026-03-12', status: 'PAUSED', size: '850 MB' }
+        ];
+
+        let linksDB = [];
+        let pendingDeleteId = null;
+        let chartInstanceDownloads = null;
+        let chartInstanceConversion = null;
+        let chartInstanceTopFiles = null;
+        let chartInstanceTraffic = null;
+
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            loadDatabase();
+            renderOverviewTopFiles();
+            renderLinksTable();
+            updateMetricCards();
+            initChartJSGraphs();
+            loadSavedFormConfigs();
+        });
+
+        // Toast Notification System
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgColor = type === 'error' ? 'bg-red-950/90 border-red-700 text-red-200' : 
+                            type === 'success' ? 'bg-emerald-950/90 border-emerald-700 text-emerald-200' : 
+                            'bg-zinc-900/90 border-zinc-700 text-zinc-200';
+
+            toast.className = `p-3 rounded border font-mono text-xs shadow-xl flex items-center justify-between gap-3 min-w-[280px] pointer-events-auto transition-all duration-300 transform translate-y-2 ${bgColor}`;
+            toast.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info'}" class="w-4 h-4"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" class="text-zinc-400 hover:text-white">&times;</button>
+            `;
+
+            container.appendChild(toast);
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Base64 helper methods
+        function safeBase64Encode(str) {
+            try {
+                return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+            } catch (e) {
+                return btoa(str);
+            }
+        }
+
+        // Load or Seed LocalStorage Data
+        function loadDatabase() {
+            const stored = localStorage.getItem(DB_KEY_LINKS);
+            if (stored) {
+                try {
+                    linksDB = JSON.parse(stored);
+                } catch(e) {
+                    linksDB = [...initialSeedLinks];
+                }
+            } else {
+                linksDB = [...initialSeedLinks];
+                saveDatabase();
+            }
+        }
+
+        function saveDatabase() {
+            localStorage.setItem(DB_KEY_LINKS, JSON.stringify(linksDB));
+            updateMetricCards();
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            const tabs = ['tab-overview', 'tab-links', 'tab-analytics', 'tab-ads', 'tab-settings'];
+            tabs.forEach(id => {
+                const el = document.getElementById(id);
+                const navBtn = document.getElementById('nav-' + id);
+                if (el) el.classList.add('hidden');
+                if (navBtn) navBtn.classList.remove('tab-active');
+            });
+
+            const targetTab = document.getElementById(tabId);
+            const targetNavBtn = document.getElementById('nav-' + tabId);
+            if (targetTab) targetTab.classList.remove('hidden');
+            if (targetNavBtn) targetNavBtn.classList.add('tab-active');
+
+            // Update Header Title
+            const titleMap = {
+                'tab-overview': 'DASHBOARD OVERVIEW',
+                'tab-links': 'KELOLA FILE & LINK SAFELINK',
+                'tab-analytics': 'GRAFIK & ANALITIK TRAFIK',
+                'tab-ads': 'MONETISASI ADSTERRA',
+                'tab-settings': 'PENGATURAN SISTEM'
+            };
+            const titleElement = document.getElementById('page-title-display');
+            if (titleElement) titleElement.querySelector('span').textContent = titleMap[tabId] || 'ADMIN DASHBOARD';
+        }
+
+        // Metric Cards Calculation
+        function updateMetricCards() {
+            const totalDL = linksDB.reduce((acc, curr) => acc + (parseInt(curr.downloads) || 0), 0);
+            const activeCount = linksDB.filter(l => l.status === 'ACTIVE').length;
+            const ecpmRate = parseFloat(localStorage.getItem('sys_ecpm') || '3.70');
+            const totalEarnings = ((totalDL * 3 * ecpmRate) / 1000).toFixed(2);
+
+            document.getElementById('stat-total-downloads').textContent = totalDL.toLocaleString();
+            document.getElementById('stat-active-links').textContent = activeCount;
+            document.getElementById('stat-total-earnings').textContent = '$' + totalEarnings;
+            document.getElementById('total-link-count').textContent = linksDB.length;
+        }
+
+        // Generate Safelink URL for a link object
+        function getSafelinkUrlForObject(linkObj) {
+            const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', 'index.html');
+            const encoded = safeBase64Encode(linkObj.originalUrl);
+            return `${baseUrl}?url=${encoded}&name=${encodeURIComponent(linkObj.name)}`;
+        }
+
+        // Render Overview Top Files
+        function renderOverviewTopFiles() {
+            const tbody = document.getElementById('overview-top-files-tbody');
+            if (!tbody) return;
+
+            const sorted = [...linksDB].sort((a, b) => b.downloads - a.downloads).slice(0, 5);
+
+            tbody.innerHTML = sorted.map(item => {
+                const safelink = getSafelinkUrlForObject(item);
+                const itemEarn = ((item.downloads * 3 * 3.7) / 1000).toFixed(2);
+                return `
+                    <tr class="hover:bg-zinc-900/50">
+                        <td class="py-3 font-bold text-white flex items-center gap-2">
+                            <i data-lucide="file" class="w-3.5 h-3.5 text-emerald-400"></i>
+                            <span>${item.name}</span>
+                        </td>
+                        <td class="py-3">${item.downloads.toLocaleString()}x</td>
+                        <td class="py-3 text-amber-400 font-bold">$${itemEarn}</td>
+                        <td class="py-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="py-3 text-right">
+                            <button type="button" onclick="copyToClipboard('${safelink}')" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px]">
+                                Salin Safelink
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        // Render Full Links Management Table
+        function renderLinksTable() {
+            const tbody = document.getElementById('links-management-tbody');
+            if (!tbody) return;
+
+            const searchVal = (document.getElementById('link-search-input')?.value || '').toLowerCase();
+            const statusFilter = document.getElementById('link-status-filter')?.value || 'ALL';
+
+            const filtered = linksDB.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(searchVal) || item.originalUrl.toLowerCase().includes(searchVal);
+                const matchStatus = statusFilter === 'ALL' || item.status === statusFilter;
+                return matchSearch && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-zinc-500 font-mono">
+                            Tidak ada data file safelink yang cocok.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const safelink = getSafelinkUrlForObject(item);
+                const itemEarn = ((item.downloads * 3 * 3.7) / 1000).toFixed(2);
+
+                return `
+                    <tr class="hover:bg-zinc-900/50">
+                        <td class="py-3 text-zinc-500 text-[10px]">${item.id}<br>${item.date}</td>
+                        <td class="py-3 font-bold text-white max-w-[200px] truncate" title="${item.name}">${item.name}</td>
+                        <td class="py-3 text-zinc-400 max-w-[220px] truncate" title="${item.originalUrl}">${item.originalUrl}</td>
+                        <td class="py-3 font-bold text-emerald-400">${item.downloads.toLocaleString()}</td>
+                        <td class="py-3 text-amber-400 font-bold">$${itemEarn}</td>
+                        <td class="py-3">
+                            <button type="button" onclick="toggleLinkStatus('${item.id}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${item.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">
+                                ${item.status}
+                            </button>
+                        </td>
+                        <td class="py-3 text-right space-x-1 shrink-0">
+                            <button type="button" onclick="copyToClipboard('${safelink}')" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-emerald-400 rounded" title="Salin Safelink URL">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <a href="${safelink}" target="_blank" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-blue-400 rounded inline-block" title="Uji Coba Link">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </a>
+                            <button type="button" onclick="openDeleteModal('${item.id}')" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-red-400 rounded" title="Hapus Link">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        function filterLinksTable() {
+            renderLinksTable();
+        }
+
+        function toggleLinkStatus(id) {
+            const item = linksDB.find(l => l.id === id);
+            if (item) {
+                item.status = item.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
+                saveDatabase();
+                renderLinksTable();
+                renderOverviewTopFiles();
+                showToast(`Status link '${item.name}' diubah ke ${item.status}`, 'info');
+            }
+        }
+
+        function copyToClipboard(text) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast('Safelink URL berhasil disalin!', 'success');
+        }
+
+        // Modals Management
+        function openAddLinkModal() {
+            document.getElementById('modal-add-link').classList.remove('hidden');
+        }
+
+        function closeAddLinkModal() {
+            document.getElementById('modal-add-link').classList.add('hidden');
+        }
+
+        function handleCreateNewLink(event) {
+            event.preventDefault();
+            const name = document.getElementById('modal-file-name').value.trim();
+            const url = document.getElementById('modal-target-url').value.trim();
+            const size = document.getElementById('modal-file-size').value.trim() || '15 MB';
+
+            if (!name || !url) {
+                showToast('Isi nama file dan URL target!', 'error');
+                return;
+            }
+
+            const newLink = {
+                id: 'lnk_' + Date.now().toString().slice(-4),
+                name: name,
+                originalUrl: url,
+                downloads: 0,
+                date: new Date().toISOString().split('T')[0],
+                status: 'ACTIVE',
+                size: size
+            };
+
+            linksDB.unshift(newLink);
+            saveDatabase();
+            renderLinksTable();
+            renderOverviewTopFiles();
+            closeAddLinkModal();
+
+            // Clear inputs
+            document.getElementById('modal-file-name').value = '';
+            document.getElementById('modal-target-url').value = '';
+            document.getElementById('modal-file-size').value = '';
+
+            const generatedSafelink = getSafelinkUrlForObject(newLink);
+            copyToClipboard(generatedSafelink);
+            showToast('Link baru berhasil dibuat & safelink disalin!', 'success');
+        }
+
+        function openDeleteModal(id) {
+            pendingDeleteId = id;
+            document.getElementById('modal-confirm-delete').classList.remove('hidden');
+            document.getElementById('btn-confirm-delete-action').onclick = executeDeleteLink;
+        }
+
+        function closeDeleteModal() {
+            pendingDeleteId = null;
+            document.getElementById('modal-confirm-delete').classList.add('hidden');
+        }
+
+        function executeDeleteLink() {
+            if (pendingDeleteId) {
+                linksDB = linksDB.filter(l => l.id !== pendingDeleteId);
+                saveDatabase();
+                renderLinksTable();
+                renderOverviewTopFiles();
+                closeDeleteModal();
+                showToast('Link berhasil dihapus.', 'info');
+            }
+        }
+
+        // Save Form Settings
+        function saveAdsterraConfig(event) {
+            event.preventDefault();
+            const smartlink = document.getElementById('admin-cfg-smartlink').value.trim();
+            const headerScript = document.getElementById('admin-cfg-banner-header').value.trim();
+            const middleScript = document.getElementById('admin-cfg-banner-middle').value.trim();
+            const popunderScript = document.getElementById('admin-cfg-popunder').value.trim();
+
+            localStorage.setItem('ad_smartlink', smartlink);
+            localStorage.setItem('ad_banner_header', headerScript);
+            localStorage.setItem('ad_banner_middle', middleScript);
+            localStorage.setItem('ad_popunder', popunderScript);
+
+            showToast('Konfigurasi iklan Adsterra disimpan & diterapkan!', 'success');
+        }
+
+        function saveSystemSettings(event) {
+            event.preventDefault();
+            const timerVal = document.getElementById('sys-timer-duration').value;
+            const ecpmVal = document.getElementById('sys-ecpm-rate').value;
+            const gatewayVal = document.getElementById('sys-gateway-url').value;
+
+            localStorage.setItem('sys_timer_duration', timerVal);
+            localStorage.setItem('sys_ecpm', ecpmVal);
+            localStorage.setItem('sys_gateway_url', gatewayVal);
+
+            updateMetricCards();
+            showToast('Pengaturan sistem berhasil disimpan!', 'success');
+        }
+
+        function loadSavedFormConfigs() {
+            if (localStorage.getItem('ad_smartlink')) document.getElementById('admin-cfg-smartlink').value = localStorage.getItem('ad_smartlink');
+            if (localStorage.getItem('ad_banner_header')) document.getElementById('admin-cfg-banner-header').value = localStorage.getItem('ad_banner_header');
+            if (localStorage.getItem('ad_banner_middle')) document.getElementById('admin-cfg-banner-middle').value = localStorage.getItem('ad_banner_middle');
+            if (localStorage.getItem('ad_popunder')) document.getElementById('admin-cfg-popunder').value = localStorage.getItem('ad_popunder');
+
+            if (localStorage.getItem('sys_timer_duration')) document.getElementById('sys-timer-duration').value = localStorage.getItem('sys_timer_duration');
+            if (localStorage.getItem('sys_ecpm')) document.getElementById('sys-ecpm-rate').value = localStorage.getItem('sys_ecpm');
+            if (localStorage.getItem('sys_gateway_url')) document.getElementById('sys-gateway-url').value = localStorage.getItem('sys_gateway_url');
+        }
+
+        function resetAllDataConfirm() {
+            linksDB = [...initialSeedLinks];
+            saveDatabase();
+            renderLinksTable();
+            renderOverviewTopFiles();
+            showToast('Data dikembalikan ke sampel awal.', 'info');
+        }
+
+        function refreshDashboardData() {
+            loadDatabase();
+            renderOverviewTopFiles();
+            renderLinksTable();
+            updateMetricCards();
+            showToast('Data dashboard diperbarui.', 'success');
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('aside');
+            if (sidebar) sidebar.classList.toggle('hidden');
+        }
+
+        // Initialize Chart.js Diagrams
+        function initChartJSGraphs() {
+            Chart.defaults.color = '#a1a1aa';
+            Chart.defaults.font.family = 'JetBrains Mono';
+
+            // Chart 1: Downloads & Impressions Line Chart
+            const ctx1 = document.getElementById('chartDownloadsTrend')?.getContext('2d');
+            if (ctx1) {
+                chartInstanceDownloads = new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                        datasets: [
+                            {
+                                label: 'Downloads',
+                                data: [1200, 1900, 1500, 2200, 2800, 3100, 2845],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Impresi Iklan (3x)',
+                                data: [3600, 5700, 4500, 6600, 8400, 9300, 8535],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'transparent',
+                                borderDash: [5, 5],
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: '#27272a' } },
+                            y: { grid: { color: '#27272a' } }
+                        }
+                    }
+                });
+            }
+
+            // Chart 2: Step Conversion Doughnut
+            const ctx2 = document.getElementById('chartStepConversion')?.getContext('2d');
+            if (ctx2) {
+                chartInstanceConversion = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Step 1 Selesai', 'Step 2 Selesai', 'Step 3 Complete'],
+                        datasets: [{
+                            data: [100, 91.5, 84.2],
+                            backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            // Chart 3: Top Files Bar Chart
+            const ctx3 = document.getElementById('chartTopFilesBar')?.getContext('2d');
+            if (ctx3) {
+                chartInstanceTopFiles = new Chart(ctx3, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Photoshop', 'GTA V Mod', 'Python Ebook', 'Win11 Activator', 'Film 4K'],
+                        datasets: [{
+                            label: 'Jumlah Download',
+                            data: [4820, 3120, 2190, 1840, 875],
+                            backgroundColor: '#10b981',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: '#27272a' } },
+                            y: { grid: { color: '#27272a' } }
+                        }
+                    }
+                });
+            }
+
+            // Chart 4: Traffic Origins Pie Chart
+            const ctx4 = document.getElementById('chartTrafficOrigin')?.getContext('2d');
+            if (ctx4) {
+                chartInstanceTraffic = new Chart(ctx4, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Google Organic', 'Direct Link', 'YouTube / Telegram', 'Blog Partner'],
+                        datasets: [{
+                            data: [45, 30, 15, 10],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#a855f7'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

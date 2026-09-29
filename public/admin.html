@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin Dashboard - Safelink Control Center</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { zinc: { 850: '#141417', 950: '#09090b' } },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #e4e4e7;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .flat-card {
+            background-color: #121215;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        .tab-active {
+            background-color: #18181b;
+            color: #10b981;
+            border-left: 3px solid #10b981;
+        }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col antialiased selection:bg-zinc-800 selection:text-emerald-400">
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <div class="flex h-screen overflow-hidden">
+
+        <aside class="w-64 bg-zinc-900/80 border-r border-zinc-800 flex flex-col justify-between shrink-0 hidden md:flex">
+            <div class="p-5 space-y-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-mono font-bold text-lg shadow-lg shadow-emerald-500/20">/&gt;</div>
+                    <div>
+                        <div class="font-mono font-bold text-sm tracking-tight text-white">GATEWAY<span class="text-emerald-400">_ADMIN</span></div>
+                        <div class="text-[10px] font-mono text-zinc-500">SAFELINK CONTROL PANEL</div>
+                    </div>
+                </div>
+
+                <nav class="space-y-1 font-mono text-xs">
+                    <button type="button" onclick="switchTab('tab-overview')" id="nav-tab-overview" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition tab-active">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>Dashboard Utama</span>
+                    </button>
+                    <button type="button" onclick="switchTab('tab-links')" id="nav-tab-links" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="link" class="w-4 h-4"></i><span>Kelola File &amp; Link</span>
+                    </button>
+                    <button type="button" onclick="switchTab('tab-analytics')" id="nav-tab-analytics" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="line-chart" class="w-4 h-4"></i><span>Grafik &amp; Analitik</span>
+                    </button>
+                    <button type="button" onclick="switchTab('tab-ads')" id="nav-tab-ads" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="dollar-sign" class="w-4 h-4"></i><span>Monetisasi (Adsterra)</span>
+                    </button>
+                    <button type="button" onclick="switchTab('tab-settings')" id="nav-tab-settings" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
+                        <i data-lucide="settings" class="w-4 h-4"></i><span>Pengaturan Sistem</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="p-4 border-t border-zinc-800 space-y-3 font-mono text-xs">
+                <div class="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1">
+                    <div class="flex items-center justify-between text-[11px]">
+                        <span class="text-zinc-500">GATEWAY_STATUS</span>
+                        <span id="gateway-status" class="text-amber-400 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> MENUNGGU
+                        </span>
+                    </div>
+                    <div class="text-[10px] text-zinc-400">Safelink Gate: <span class="text-zinc-200">index.html</span></div>
+                </div>
+                <a href="/" target="_blank" rel="noopener" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded flex items-center justify-center gap-2 transition text-xs">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i><span>Buka Halaman Safelink</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+            <header class="h-16 border-b border-zinc-800 bg-zinc-900/50 px-6 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="toggleMobileMenu()" class="md:hidden text-zinc-400 hover:text-white">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <h1 id="page-title-display" class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 text-emerald-400"></i>
+                        <span>DASHBOARD OVERVIEW</span>
+                    </h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="openAddLinkModal()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center gap-2 transition shadow-lg shadow-emerald-950/40">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Tambah Link Baru</span>
+                    </button>
+                    <button type="button" onclick="loadAll()" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition" title="Refresh Data">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+
+                <div id="tab-overview" class="space-y-6 fade-in">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>TOTAL KUNJUNGAN</span><i data-lucide="eye" class="w-4 h-4 text-emerald-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-views" class="text-2xl font-bold font-mono text-white">0</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">Safelink dibuka</div>
+                        </div>
+
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>UNDUHAN SELESAI</span><i data-lucide="download" class="w-4 h-4 text-blue-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-completes" class="text-2xl font-bold font-mono text-white">0</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">Tuntas 3 langkah verifikasi</div>
+                        </div>
+
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>ESTIMASI EARNING</span><i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-earnings" class="text-2xl font-bold font-mono text-white">$0.00</span>
+                                <span id="stat-ecpm" class="text-[11px] font-mono text-amber-400 font-bold">eCPM $0</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono">3 unit iklan per kunjungan</div>
+                        </div>
+
+                        <div class="flat-card p-5 space-y-2">
+                            <div class="flex items-center justify-between text-zinc-400 text-xs font-mono">
+                                <span>COMPLETION RATE</span><i data-lucide="check-circle" class="w-4 h-4 text-purple-400"></i>
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span id="stat-completion-rate" class="text-2xl font-bold font-mono text-white">0%</span>
+                            </div>
+                            <div class="text-[11px] text-zinc-500 font-mono"><span id="stat-active-links">0</span> link aktif dari <span id="stat-total-links">0</span></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-8 flat-card p-5 space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+                                <div>
+                                    <h3 class="font-mono font-bold text-sm text-zinc-200">Tren Kunjungan &amp; Unduhan (7 Hari Terakhir)</h3>
+                                    <p class="text-xs text-zinc-500 font-mono">Data nyata dari server, bukan angka simulasi</p>
+                                </div>
+                                <div class="flex gap-2 font-mono text-xs">
+                                    <span class="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Kunjungan</span>
+                                    <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Unduhan</span>
+                                </div>
+                            </div>
+                            <div class="h-64 sm:h-72 w-full"><canvas id="chartTrend"></canvas></div>
+                        </div>
+
+                        <div class="lg:col-span-4 flat-card p-5 space-y-4">
+                            <div class="border-b border-zinc-800 pb-3">
+                                <h3 class="font-mono font-bold text-sm text-zinc-200">Funnel Verifikasi</h3>
+                                <p class="text-xs text-zinc-500 font-mono">Retensi pengunjung di tiap tahap</p>
+                            </div>
+                            <div class="h-56 w-full flex items-center justify-center"><canvas id="chartFunnel"></canvas></div>
+                            <div class="grid grid-cols-3 gap-2 text-center font-mono text-[11px] pt-2 border-t border-zinc-800">
+                                <div><div class="text-amber-400 font-bold" id="funnel-s1">0%</div><div class="text-zinc-500">Step 1</div></div>
+                                <div><div class="text-blue-400 font-bold" id="funnel-s2">0%</div><div class="text-zinc-500">Step 2</div></div>
+                                <div><div class="text-emerald-400 font-bold" id="funnel-s3">0%</div><div class="text-zinc-500">Step 3</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flat-card p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                            <h3 class="font-mono font-bold text-sm text-zinc-200 flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Top 5 File Paling Banyak Dikunjungi</span>
+                            </h3>
+                            <button type="button" onclick="switchTab('tab-links')" class="text-xs font-mono text-emerald-400 hover:underline">Lihat Semua File &rarr;</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-mono text-xs">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-zinc-500 uppercase">
+                                        <th class="pb-2">Nama Berkas</th>
+                                        <th class="pb-2">Kunjungan</th>
+                                        <th class="pb-2">Unduhan</th>
+                                        <th class="pb-2">Estimasi</th>
+                                        <th class="pb-2">Status</th>
+                                        <th class="pb-2 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overview-top-files-tbody" class="divide-y divide-zinc-800/60 text-zinc-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-links" class="space-y-6 hidden fade-in">
+                    <div class="flat-card p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="relative w-full sm:w-80">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"></i>
+                            <input type="text" id="link-search-input" onkeyup="renderLinksTable()" placeholder="Cari nama file..." class="w-full bg-zinc-950 border border-zinc-800 rounded pl-9 pr-3 py-2 text-xs font-mono text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                        </div>
+                        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                            <select id="link-status-filter" onchange="renderLinksTable()" class="bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-xs font-mono text-zinc-300 focus:border-emerald-500 focus:outline-none">
+                                <option value="ALL">Semua Status</option>
+                                <option value="ACTIVE">Aktif</option>
+                                <option value="PAUSED">Nonaktif</option>
+                            </select>
+                            <button type="button" onclick="openAddLinkModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center gap-1.5 transition shrink-0">
+                                <i data-lucide="plus" class="w-4 h-4"></i><span>Tambah File</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flat-card p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                            <h3 class="font-mono font-bold text-sm text-zinc-200">Daftar Semua Tautan Safelink (<span id="total-link-count">0</span>)</h3>
+                            <span class="text-xs font-mono text-zinc-500">Tersimpan di Vercel KV</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-mono text-xs">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-zinc-500 uppercase">
+                                        <th class="pb-3">ID</th>
+                                        <th class="pb-3">Nama Berkas</th>
+                                        <th class="pb-3">Safelink URL</th>
+                                        <th class="pb-3">Kunjungan</th>
+                                        <th class="pb-3">Unduhan</th>
+                                        <th class="pb-3">Estimasi</th>
+                                        <th class="pb-3">Status</th>
+                                        <th class="pb-3 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="links-management-tbody" class="divide-y divide-zinc-800/60 text-zinc-300"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-analytics" class="space-y-6 hidden fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="flat-card p-5 space-y-4">
+                            <div class="border-b border-zinc-800 pb-3">
+                                <h3 class="font-mono font-bold text-sm text-zinc-200">5 File Teratas Berdasarkan Kunjungan</h3>
+                                <p class="text-xs text-zinc-500 font-mono">Volume kunjungan kumulatif per berkas</p>
+                            </div>
+                            <div class="h-64 w-full"><canvas id="chartTopFiles"></canvas></div>
+                        </div>
+                        <div class="flat-card p-5 space-y-4">
+                            <div class="border-b border-zinc-800 pb-3">
+                                <h3 class="font-mono font-bold text-sm text-zinc-200">Komposisi Funnel Global</h3>
+                                <p class="text-xs text-zinc-500 font-mono">Jumlah absolut penyelesaian tiap langkah</p>
+                            </div>
+                            <div class="h-64 w-full flex items-center justify-center"><canvas id="chartFunnelAbs"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="flat-card p-5 space-y-3 font-mono text-xs">
+                        <h4 class="font-bold text-zinc-200 uppercase tracking-wide flex items-center gap-2">
+                            <i data-lucide="info" class="w-4 h-4 text-emerald-400"></i>
+                            <span>Cara Data ini Dihitung</span>
+                        </h4>
+                        <p class="text-zinc-400 leading-relaxed">
+                            Angka berasal dari data nyata, bukan placeholder. Satu <strong>kunjungan</strong> dihitung saat halaman safelink dibuka (<code>GET /api/resolve</code>). Setiap penyelesaian langkah verifikasi dicatat terpisah di server (<code>POST /api/track</code>), sehingga pengunjung yang melompat langsung ke langkah 3 tidak akan terhitung. <strong>Estimasi earning</strong> = kunjungan &times; 3 unit iklan &times; eCPM, dan hanya perkiraan kasar — pembayarannya tetap mengikuti laporan Adsterra.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="tab-ads" class="space-y-6 hidden fade-in">
+                    <div class="flat-card p-6 space-y-6 max-w-4xl">
+                        <div class="border-b border-zinc-800 pb-3 space-y-1">
+                            <h3 class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
+                                <i data-lucide="dollar-sign" class="w-5 h-5 text-amber-400"></i>
+                                <span>Pengaturan Unit Iklan Adsterra</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400 font-mono">
+                                Disimpan di server dan langsung berlaku untuk semua pengunjung. Tidak ada lagi pengaturan iklan di halaman safelink.
+                            </p>
+                        </div>
+
+                        <form onsubmit="saveAdConfig(event)" class="space-y-4 font-mono text-xs">
+                            <div>
+                                <label class="block text-zinc-300 font-bold mb-1">1. Smartlink URL Adsterra (dibuka tiap klik verifikasi)</label>
+                                <input type="url" id="cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-zinc-300 font-bold mb-1">2. Banner 728x90 (header &amp; footer)</label>
+                                    <textarea id="cfg-banner-header" rows="4" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-zinc-300 font-bold mb-1">3. Banner 300x250 (action zone, sidebar, konten)</label>
+                                    <textarea id="cfg-banner-middle" rows="4" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-zinc-300 font-bold mb-1">4. Script Pop-Under Adsterra</label>
+                                <textarea id="cfg-popunder" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                            </div>
+                            <div class="pt-3 border-t border-zinc-800 flex justify-end">
+                                <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded flex items-center gap-2 transition">
+                                    <i data-lucide="save" class="w-4 h-4"></i><span>Simpan Konfigurasi Iklan</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="tab-settings" class="space-y-6 hidden fade-in">
+                    <div class="flat-card p-6 space-y-6 max-w-3xl">
+                        <div class="border-b border-zinc-800 pb-3 space-y-1">
+                            <h3 class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
+                                <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i>
+                                <span>Pengaturan Gateway Safelink</span>
+                            </h3>
+                            <p class="text-xs text-zinc-400 font-mono">Durasi hitung mundur, eCPM, dan domain safelink.</p>
+                        </div>
+
+                        <form onsubmit="saveSettings(event)" class="space-y-4 font-mono text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-zinc-300 mb-1 font-bold">Durasi Timer per Step (detik)</label>
+                                    <input type="number" id="cfg-timer" min="3" max="60" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-blue-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-zinc-300 mb-1 font-bold">Estimasi eCPM ($)</label>
+                                    <input type="number" step="0.1" min="0" id="cfg-ecpm" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-blue-500 focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-zinc-300 mb-1 font-bold">Domain Safelink (untuk generate tautan)</label>
+                                <input type="url" id="cfg-gateway" placeholder="Kosongkan untuk memakai domain saat ini" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-blue-500 focus:outline-none">
+                                <p class="text-[10px] text-zinc-500 mt-1">Dipakai saat menyalin tautan safelink, jadi tautannya tetap benar setelah dipindah ke domain lain.</p>
+                            </div>
+                            <div class="pt-4 border-t border-zinc-800 flex items-center justify-between gap-3">
+                                <p class="text-[10px] text-zinc-500">Data tidak bisa direset dari sini. Hapus link satu per satu di tab <span class="text-zinc-300">Kelola File</span>.</p>
+                                <button type="submit" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded flex items-center gap-2 transition shrink-0">
+                                    <i data-lucide="save" class="w-4 h-4"></i><span>Simpan Pengaturan</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <div id="modal-add-link" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="flat-card max-w-lg w-full p-6 space-y-4 border border-zinc-700">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div class="flex items-center gap-2 font-mono font-bold text-white text-sm">
+                    <i data-lucide="link-2" class="w-4 h-4 text-emerald-400"></i><span>TAMBAH FILE DOWNLOAD</span>
+                </div>
+                <button type="button" onclick="closeAddLinkModal()" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <form onsubmit="createLink(event)" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">Nama File / Berkas *</label>
+                    <input type="text" id="modal-file-name" required maxlength="120" placeholder="Contoh: Photoshop_2026_Full.zip" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">URL Download Asli (Drive / MediaFire / Mega) *</label>
+                    <input type="url" id="modal-target-url" required placeholder="https://drive.google.com/file/d/123456/view" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                    <p class="text-[10px] text-zinc-500 mt-1">Disimpan terenkripsi di server dan tidak pernah dikirim ke browser pengunjung sebelum verifikasi selesai.</p>
+                </div>
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">Ukuran File (opsional)</label>
+                    <input type="text" id="modal-file-size" maxlength="40" placeholder="1.4 GB" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none">
+                </div>
+                <div class="pt-2 flex justify-end gap-2 border-t border-zinc-800">
+                    <button type="button" onclick="closeAddLinkModal()" class="px-4 py-2 bg-zinc-800 text-zinc-300 rounded">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i><span>Generate &amp; Simpan Link</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-safelink-result" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="flat-card max-w-lg w-full p-6 space-y-4 border border-emerald-700/60">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div class="flex items-center gap-2 font-mono font-bold text-white text-sm">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span>SAFELINK SIAP DIBAAGIKAN</span>
+                </div>
+                <button type="button" onclick="$('modal-safelink-result').classList.add('hidden')" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <div class="space-y-3 font-mono text-xs">
+                <div>
+                    <label class="block text-zinc-300 mb-1 font-bold">Tautan Bagikan</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="safelink-output" readonly class="w-full bg-zinc-950 border border-zinc-700 rounded p-2.5 text-emerald-300 select-all">
+                        <button type="button" onclick="copySafelink()" class="px-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded shrink-0">SALIN</button>
+                    </div>
+                </div>
+                <p class="text-[10px] text-zinc-500">Bagikan tautan ini ke mana pun. Pengunjung akan melewati 3 langkah verifikasi dan iklan sebelum sampai ke file asli.</p>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+    const icons = () => { if (window.lucide?.createIcons) lucide.createIcons(); };
+
+    const app = {
+        links: [],
+        config: {},
+        stats: { totals: {}, files: [], series: [] },
+        pendingDelete: null,
+    };
+    let charts = {};
+
+    async function api(path, options = {}) {
+        const res = await fetch(path, {
+            headers: options.body ? { 'Content-Type': 'application/json' } : {},
+            ...options,
+        });
+        if (res.status === 401) throw new Error('Sesi login habis, muat ulang halaman.');
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+        return body;
+    }
+
+    function showToast(message, type = 'info') {
+        const container = $('toast-container');
+        if (!container) return;
+        const bg = type === 'error' ? 'bg-red-950/90 border-red-700 text-red-200'
+            : type === 'success' ? 'bg-emerald-950/90 border-emerald-700 text-emerald-200'
+            : 'bg-zinc-900/90 border-zinc-700 text-zinc-200';
+        const toast = document.createElement('div');
+        toast.className = `p-3 rounded border font-mono text-xs shadow-xl flex items-center justify-between gap-3 min-w-[280px] pointer-events-auto ${bg}`;
+        toast.innerHTML = '<span></span><button type="button" class="text-zinc-400 hover:text-white">&times;</button>';
+        toast.firstElementChild.textContent = message;
+        toast.lastElementChild.onclick = () => toast.remove();
+        container.appendChild(toast);
+        icons();
+        setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+
+    function safelinkBase() {
+        const configured = (app.config.gatewayUrl || '').trim();
+        return configured ? configured.replace(/\/+$/, '') : window.location.origin;
+    }
+    const safelinkFor = (id) => `${safelinkBase()}/?id=${encodeURIComponent(id)}`;
+
+    const money = (v) => `$${Number(v || 0).toFixed(2)}`;
+    const fmt = (v) => Number(v || 0).toLocaleString('id-ID');
+
+    function switchTab(tabId) {
+        ['tab-overview', 'tab-links', 'tab-analytics', 'tab-ads', 'tab-settings'].forEach((id) => {
+            $(id)?.classList.add('hidden');
+            $('nav-' + id)?.classList.remove('tab-active');
+        });
+        $(tabId)?.classList.remove('hidden');
+        $('nav-' + tabId)?.classList.add('tab-active');
+        const titles = {
+            'tab-overview': 'DASHBOARD OVERVIEW',
+            'tab-links': 'KELOLA FILE & LINK SAFELINK',
+            'tab-analytics': 'GRAFIK & ANALITIK TRAFIK',
+            'tab-ads': 'MONETISASI ADSTERRA',
+            'tab-settings': 'PENGATARAN SISTEM',
+        };
+        $('page-title-display').querySelector('span').textContent = titles[tabId] || 'ADMIN';
+
+        // Kanvas di tab tersembunyi berukuran 0, jadi Chart.js harus menggambar ulang.
+        if (tabId === 'tab-analytics') requestAnimationFrame(drawCharts);
+    }
+
+    function renderStats() {
+        const t = app.stats.totals;
+        $('stat-views').textContent = fmt(t.views);
+        $('stat-completes').textContent = fmt(t.completes);
+        $('stat-earnings').textContent = money(t.estEarnings);
+        $('stat-ecpm').textContent = `eCPM $${Number(t.ecpm || 0).toFixed(2)}`;
+        $('stat-completion-rate').textContent = `${t.completionRate || 0}%`;
+        $('stat-active-links').textContent = fmt(t.activeLinks);
+        $('stat-total-links').textContent = fmt(t.totalLinks);
+        $('total-link-count').textContent = fmt(t.totalLinks);
+
+        const pct = (n) => (t.views ? Math.round(((n || 0) / t.views) * 1000) / 10 : 0);
+        $('funnel-s1').textContent = `${pct(t.step1)}%`;
+        $('funnel-s2').textContent = `${pct(t.step2)}%`;
+        $('funnel-s3').textContent = `${pct(t.step3)}%`;
+
+        drawCharts();
+    }
+
+    function statusBadge(status) {
+        return status === 'ACTIVE'
+            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+            : 'bg-red-500/10 text-red-400 border border-red-500/20';
+    }
+
+    function renderOverviewFiles() {
+        const top = app.stats.files.slice(0, 5);
+        $('overview-top-files-tbody').innerHTML = top.length
+            ? top.map((f) => `
+                <tr class="hover:bg-zinc-900/50">
+                    <td class="py-3 font-bold text-white max-w-[220px] truncate" title="${esc(f.name)}">${esc(f.name)}</td>
+                    <td class="py-3">${fmt(f.views)}x</td>
+                    <td class="py-3 text-blue-400 font-bold">${fmt(f.completes)}x</td>
+                    <td class="py-3 text-amber-400 font-bold">${money(f.estEarnings)}</td>
+                    <td class="py-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${statusBadge(f.status)}">${f.status}</span></td>
+                    <td class="py-3 text-right">
+                        <button type="button" data-copy="${esc(safelinkFor(f.id))}" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px]">Salin Safelink</button>
+                    </td>
+                </tr>`).join('')
+            : `<tr><td colspan="6" class="py-8 text-center text-zinc-500">Belum ada file. Tambahkan link pertama Anda.</td></tr>`;
+        icons();
+    }
+
+    function renderLinksTable() {
+        const search = ($('link-search-input').value || '').toLowerCase();
+        const status = $('link-status-filter').value || 'ALL';
+        const rows = app.links.filter((l) => {
+            const byName = (l.name || '').toLowerCase().includes(search);
+            const byId = (l.id || '').toLowerCase().includes(search);
+            return (byName || byId) && (status === 'ALL' || l.status === status);
+        });
+
+        const byId = new Map(app.stats.files.map((f) => [f.id, f]));
+        $('links-management-tbody').innerHTML = rows.length
+            ? rows.map((l) => {
+                const s = byId.get(l.id) || { views: 0, completes: 0, estEarnings: 0 };
+                const link = safelinkFor(l.id);
+                return `
+                <tr class="hover:bg-zinc-900/50">
+                    <td class="py-3 text-zinc-500">${esc(l.id)}<br><span class="text-[10px]">${(l.createdAt || '').slice(0, 10)}</span></td>
+                    <td class="py-3 font-bold text-white max-w-[200px] truncate" title="${esc(l.name)}">${esc(l.name)}</td>
+                    <td class="py-3 text-zinc-400 max-w-[200px] truncate font-mono text-[10px]" title="${esc(link)}">${esc(link)}</td>
+                    <td class="py-3 font-bold text-emerald-400">${fmt(s.views)}</td>
+                    <td class="py-3 font-bold text-blue-400">${fmt(s.completes)}</td>
+                    <td class="py-3 text-amber-400 font-bold">${money(s.estEarnings)}</td>
+                    <td class="py-3">
+                        <button type="button" onclick="toggleStatus('${esc(l.id)}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${statusBadge(l.status)}">${l.status}</button>
+                    </td>
+                    <td class="py-3 text-right space-x-1 shrink-0">
+                        <button type="button" data-copy="${esc(link)}" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-emerald-400 rounded" title="Salin Safelink URL"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                        <a href="${esc(link)}" target="_blank" rel="noopener" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-blue-400 rounded inline-block" title="Uji Coba Link"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
+                        <button type="button" onclick="confirmDelete('${esc(l.id)}')" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-red-400 rounded" title="Hapus Link"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </td>
+                </tr>`;
+            }).join('')
+            : `<tr><td colspan="8" class="py-8 text-center text-zinc-500">Tidak ada file yang cocok.</td></tr>`;
+        icons();
+    }
+
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    function renderConfigForm() {
+        const c = app.config;
+        $('cfg-smartlink').value = c.smartlink || '';
+        $('cfg-banner-header').value = c.bannerHeader || '';
+        $('cfg-banner-middle').value = c.bannerMiddle || '';
+        $('cfg-popunder').value = c.bannerPopunder || '';
+        $('cfg-timer').value = c.timerSeconds ?? 10;
+        $('cfg-ecpm').value = c.ecpm ?? 3.7;
+        $('cfg-gateway').value = c.gatewayUrl || '';
+    }
+
+    const configPayload = (overrides = {}) => ({
+        smartlink: $('cfg-smartlink').value.trim(),
+        bannerHeader: $('cfg-banner-header').value.trim(),
+        bannerMiddle: $('cfg-banner-middle').value.trim(),
+        bannerPopunder: $('cfg-popunder').value.trim(),
+        timerSeconds: Number($('cfg-timer').value),
+        ecpm: Number($('cfg-ecpm').value),
+        gatewayUrl: $('cfg-gateway').value.trim(),
+        ...overrides,
+    });
+
+    async function saveAdConfig(event) {
+        event.preventDefault();
+        try {
+            app.config = await api('/api/ads', { method: 'PUT', body: JSON.stringify(configPayload()) });
+            renderConfigForm();
+            showToast('Konfigurasi iklan tersimpan dan langsung aktif.', 'success');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function saveSettings(event) {
+        event.preventDefault();
+        try {
+            app.config = await api('/api/ads', { method: 'PUT', body: JSON.stringify(configPayload()) });
+            showToast('Pengaturan sistem tersimpan.', 'success');
+            await loadAll();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function createLink(event) {
+        event.preventDefault();
+        const payload = {
+            name: $('modal-file-name').value.trim(),
+            url: $('modal-target-url').value.trim(),
+            size: $('modal-file-size').value.trim(),
+        };
+        try {
+            const { link } = await api('/api/links', { method: 'POST', body: JSON.stringify(payload) });
+            app.links.unshift(link);
+            $('modal-add-link').classList.add('hidden');
+            event.target.reset();
+            $('safelink-output').value = safelinkFor(link.id);
+            $('modal-safelink-result').classList.remove('hidden');
+            showToast('Link berhasil dibuat.', 'success');
+            await loadStats();
+            renderLinksTable();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    async function toggleStatus(id) {
+        const link = app.links.find((l) => l.id === id);
+        if (!link) return;
+        try {
+            const next = link.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
+            await api(`/api/link/${encodeURIComponent(id)}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: next }),
+            });
+            link.status = next;
+            renderLinksTable();
+            showToast(`${link.name} -> ${next}`, 'info');
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    function confirmDelete(id) {
+        const link = app.links.find((l) => l.id === id);
+        if (!link) return;
+        if (!window.confirm(`Hapus "${link.name}"?\n\nLinknya langsung mati dan statistiknya ikut terhapus. Tindakan ini tidak bisa dibatalkan.`)) return;
+        api(`/api/link/${encodeURIComponent(id)}`, { method: 'DELETE' })
+            .then(() => {
+                app.links = app.links.filter((l) => l.id !== id);
+                renderLinksTable();
+                showToast('Link dihapus.', 'info');
+                loadStats();
+            })
+            .catch((err) => showToast(err.message, 'error'));
+    }
+
+    async function copySafelink() {
+        const input = $('safelink-output');
+        input.select();
+        try {
+            await navigator.clipboard.writeText(input.value);
+        } catch {
+            document.execCommand('copy');
+        }
+        showToast('Safelink URL disalin.', 'success');
+    }
+
+    function toggleMobileMenu() {
+        document.querySelector('aside')?.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (event) => {
+        const btn = event.target.closest('[data-copy]');
+        if (!btn) return;
+        navigator.clipboard?.writeText(btn.dataset.copy).catch(() => {});
+        showToast('Safelink URL disalin.', 'success');
+    });
+
+    function drawCharts() {
+        if (typeof Chart === 'undefined') return;
+        Chart.defaults.color = '#a1a1aa';
+        Chart.defaults.font.family = 'JetBrains Mono';
+
+        const t = app.stats.totals;
+        const series = app.stats.series;
+        const top = app.stats.files.slice(0, 5);
+        const grid = { color: '#27272a' };
+        const aspect = { responsive: true, maintainAspectRatio: false };
+
+        charts.trend?.destroy();
+        charts.trend = new Chart($('chartTrend'), {
+            type: 'line',
+            data: {
+                labels: series.map((d) => d.date.slice(5)),
+                datasets: [
+                    { label: 'Kunjungan', data: series.map((d) => d.views), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.1)', fill: true, tension: 0.3, pointRadius: 3 },
+                    { label: 'Unduhan', data: series.map((d) => d.completes), borderColor: '#3b82f6', backgroundColor: 'transparent', tension: 0.3, pointRadius: 3 },
+                ],
+            },
+            options: { ...aspect, plugins: { legend: { display: false } }, scales: { x: { grid }, y: { grid, beginAtZero: true } } },
+        });
+
+        const funnel = [t.step1 || 0, t.step2 || 0, t.step3 || 0];
+        const funnelPct = [0, 1, 2].map((i) => (t.views ? Math.round((funnel[i] / t.views) * 1000) / 10 : 0));
+        const doughnut = (data) => ({
+            type: 'doughnut',
+            data: { labels: ['Step 1', 'Step 2', 'Step 3'], datasets: [{ data, backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'], borderWidth: 0 }] },
+            options: { ...aspect, plugins: { legend: { position: 'bottom' } } },
+        });
+
+        charts.funnel?.destroy();
+        charts.funnel = new Chart($('chartFunnel'), doughnut(funnelPct.some(Boolean) ? funnelPct : [1, 1, 1]));
+
+        charts.funnelAbs?.destroy();
+        charts.funnelAbs = new Chart($('chartFunnelAbs'), {
+            type: 'bar',
+            data: { labels: ['Step 1', 'Step 2', 'Step 3'], datasets: [{ label: 'Penyelesaian', data: funnel, backgroundColor: '#f59e0b', borderRadius: 4 }] },
+            options: { ...aspect, plugins: { legend: { display: false } }, scales: { x: { grid }, y: { grid, beginAtZero: true } } },
+        });
+
+        charts.top?.destroy();
+        charts.top = new Chart($('chartTopFiles'), {
+            type: 'bar',
+            data: {
+                labels: top.map((f) => f.name.length > 16 ? f.name.slice(0, 16) + '…' : f.name),
+                datasets: [{ label: 'Kunjungan', data: top.map((f) => f.views), backgroundColor: '#10b981', borderRadius: 4 }],
+            },
+            options: { ...aspect, plugins: { legend: { display: false } }, scales: { x: { grid }, y: { grid, beginAtZero: true } } },
+        });
+    }
+
+    async function loadStats() {
+        app.stats = await api('/api/stats');
+        renderStats();
+        renderOverviewFiles();
+    }
+
+    async function loadAll() {
+        try {
+            const [config, links] = await Promise.all([api('/api/ads'), api('/api/links')]);
+            app.config = config;
+            app.links = links.links;
+            renderConfigForm();
+            renderLinksTable();
+            await loadStats();
+            $('gateway-status').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ONLINE';
+            $('gateway-status').className = 'text-emerald-400 flex items-center gap-1';
+        } catch (err) {
+            $('gateway-status').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> ERROR';
+            $('gateway-status').className = 'text-red-400 flex items-center gap-1';
+            showToast(err.message, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        icons();
+        loadAll();
+    });
+
+    const openAddLinkModal = () => $('modal-add-link').classList.remove('hidden');
+    const closeAddLinkModal = () => $('modal-add-link').classList.add('hidden');
+</script>
+</body>
+</html>

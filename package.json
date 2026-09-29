@@ -1,0 +1,18 @@
+{
+  "name": "safelink-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Safelink download gate with Adsterra monetisation, admin dashboard and server-side link protection.",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod",
+    "check": "node scripts/selfcheck.mjs"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.34.3"
+  }
+}

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>Secure Gate &amp; Link Verification Hub</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { zinc: { 850: '#141417', 950: '#09090b' } },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b;
+            color: #e4e4e7;
+            scroll-behavior: smooth;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .flat-card {
+            background-color: #121215;
+            border: 1px solid #27272a;
+            border-radius: 6px;
+        }
+        .ad-unit-box {
+            background-color: #09090b;
+            border: 1px dashed #3f3f46;
+            border-radius: 4px;
+        }
+        .progress-line { transition: width 0.3s linear; }
+        .page-fade { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .ad-style-btn {
+            background-color: #141418;
+            border: 1px dashed #4b5563;
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+        }
+        .ad-style-btn:hover { border-color: #10b981; background-color: #18181c; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-zinc-200 antialiased selection:bg-zinc-800 selection:text-white pb-24">
+
+    <div id="adsterra-popunder-container"></div>
+    <div id="toast-container" class="fixed top-16 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+    <header class="border-b border-zinc-800 bg-zinc-950/90 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded bg-zinc-100 text-zinc-950 flex items-center justify-center font-mono font-bold text-sm">/&gt;</div>
+                <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-sm tracking-tight text-white">GATEWAY<span class="text-emerald-500">_SECURE</span></span>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">v4_SERVERLESS</span>
+                </div>
+            </a>
+            <div class="flex items-center gap-2 font-mono text-[10px] text-zinc-500 border border-zinc-800 rounded px-2.5 py-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                EDGE ONLINE
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full flex-grow space-y-8">
+
+        <section class="w-full flex justify-center items-center">
+            <div id="ad-slot-header" class="w-full max-w-[728px] min-h-[90px] ad-unit-box p-2 flex flex-col items-center justify-center text-center text-xs text-zinc-500 font-mono">
+                [ADSTERRA_SLOT_01: BANNER_728x90_HEADER]
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <div class="lg:col-span-8 space-y-8">
+
+                <div class="flat-card p-5 sm:p-6 space-y-5">
+                    <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-zinc-800 font-mono">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center text-emerald-400 shrink-0">
+                                <i data-lucide="file-code" class="w-5 h-5"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h2 id="file-title-display" class="font-bold text-zinc-100 text-sm sm:text-base break-all">MEMUAT BERKAS...</h2>
+                                <div class="flex items-center gap-3 text-xs text-zinc-400 mt-0.5">
+                                    <span id="file-size-display">SIZE: -</span>
+                                    <span>&bull;</span>
+                                    <span class="text-emerald-400 flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> CHECKSUM_PASSED</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 px-3 py-1.5 rounded border border-zinc-800 text-xs font-mono flex items-center gap-2">
+                            <span class="text-zinc-500">PROSES:</span>
+                            <span id="step-badge" class="text-amber-400 font-bold">LANGKAH 1 / 3</span>
+                        </div>
+                    </div>
+
+                    <div id="step-top-action-container" class="pt-2">
+
+                        <div id="trigger-step-1" class="space-y-2">
+                            <button type="button" id="btn-step-1" disabled class="w-full text-left ad-style-btn p-4 cursor-wait flex flex-col sm:flex-row items-center justify-between gap-4 border-amber-500/40 hover:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-500 disabled:opacity-60">
+                                <div class="flex items-center gap-3 text-left">
+                                    <div class="w-10 h-10 rounded bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">SPONSORED_VERIFY_STEP_01</span>
+                                            <span class="text-[10px] font-mono text-zinc-500">CLICK_TO_SCAN</span>
+                                        </div>
+                                        <h3 class="text-xs sm:text-sm font-bold font-mono text-zinc-100 mt-1">LANGKAH 1: MULAI VERIFIKASI SOKET &amp; TOKENS</h3>
+                                        <p class="text-[11px] text-zinc-400 font-mono">Klik banner verifikasi ini untuk menginisialisasi sesi dan otomatis menuju ke area timer bawah.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-bold text-xs rounded shrink-0 flex items-center gap-1.5">
+                                    <span>VERIFIKASI NOW</span>
+                                    <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div id="trigger-step-2" class="space-y-2 hidden">
+                            <button type="button" id="btn-step-2" class="w-full text-left ad-style-btn p-4 cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 border-blue-500/40 hover:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <div class="flex items-center gap-3 text-left">
+                                    <div class="w-10 h-10 rounded bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                                        <i data-lucide="key" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold uppercase">SPONSORED_VERIFY_STEP_02</span>
+                                            <span class="text-[10px] font-mono text-zinc-500">DECRYPT_PHASE</span>
+                                        </div>
+                                        <h3 class="text-xs sm:text-sm font-bold font-mono text-zinc-100 mt-1">LANGKAH 2: DEKRIPSI PARTIAL PAYLOAD &amp; ECDHE</h3>
+                                        <p class="text-[11px] text-zinc-400 font-mono">Klik untuk membuka kunci tahap kedua dan menggulir ke timer bawah.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs rounded shrink-0 flex items-center gap-1.5">
+                                    <span>DEKRIPSI NOW</span>
+                                    <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div id="trigger-step-3" class="space-y-2 hidden">
+                            <button type="button" id="btn-step-3" class="w-full text-left ad-style-btn p-4 cursor-pointer flex flex-col sm:flex-row items-center justify-between gap-4 border-emerald-500/40 hover:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                <div class="flex items-center gap-3 text-left">
+                                    <div class="w-10 h-10 rounded bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                                        <i data-lucide="unlock" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold uppercase">SPONSORED_VERIFY_STEP_03</span>
+                                            <span class="text-[10px] font-mono text-zinc-500">FINAL_UNLOCK</span>
+                                        </div>
+                                        <h3 class="text-xs sm:text-sm font-bold font-mono text-zinc-100 mt-1">LANGKAH 3: OTORISASI AKSES DIRECT CDN EDGE</h3>
+                                        <p class="text-[11px] text-zinc-400 font-mono">Klik untuk menyelesaikan verifikasi akhir dan mengaktifkan tautan unduhan.</p>
+                                    </div>
+                                </div>
+                                <div class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs rounded shrink-0 flex items-center gap-1.5">
+                                    <span>UNBLOCK LINK</span>
+                                    <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <article id="article-content-container" class="flat-card p-6 sm:p-8 space-y-6 text-zinc-300 text-xs sm:text-sm leading-relaxed page-fade"></article>
+
+                <section class="flat-card p-4 space-y-2">
+                    <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                        <span>// DYNAMIC_IN_CONTENT_AD_UNIT</span>
+                        <span id="ad-unit-label">SLOT_STEP_01</span>
+                    </div>
+                    <div id="ad-slot-middle-dynamic" class="min-h-[140px] ad-unit-box p-3 flex items-center justify-center text-center text-xs font-mono text-zinc-600">
+                        [ADSTERRA_SLOT_MID_DYNAMIC: BANNER_468x60_OR_300x250]
+                    </div>
+                </section>
+
+                <section class="flat-card p-6 space-y-4 font-mono text-xs text-zinc-400">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-3 text-zinc-200 font-bold">
+                        <span class="flex items-center gap-2"><i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i> EDGE_SERVER_DIAGNOSTICS</span>
+                        <span class="text-[10px] text-zinc-500">REFRESH_RATE: 1000ms</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[11px]">
+                        <div class="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1.5">
+                            <div class="text-zinc-500">// CACHE_HIT_RATIO</div>
+                            <div class="text-emerald-400 font-bold text-sm">99.42% (REDIS_MEMCACHED)</div>
+                            <p class="text-[10px] text-zinc-500">Distribusi paket dilakukan via CDN Edge Node terdekat untuk meminimalkan beban latensi unduhan.</p>
+                        </div>
+                        <div class="p-3 bg-zinc-950 border border-zinc-800 rounded space-y-1.5">
+                            <div class="text-zinc-500">// HANDSHAKE_PROTOCOL</div>
+                            <div class="text-amber-400 font-bold text-sm">TLS_AES_256_GCM_SHA384</div>
+                            <p class="text-[10px] text-zinc-500">Koneksi terenkripsi penuh dari browser klien hingga server gateway dekripsi akhir.</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-zinc-950 border border-zinc-800 rounded text-[11px] space-y-1">
+                        <div class="text-zinc-500">// LIVE_SERVER_SOCKET_STREAM</div>
+                        <div class="text-zinc-300">&gt; IP_ORIGIN: VERIFIED_RESIDENTIAL_ASN</div>
+                        <div class="text-zinc-300">&gt; HEADER_USER_AGENT: MOZILLA/5.0 (COMPATIBLE_CLIENT)</div>
+                        <div class="text-emerald-400">&gt; BOT_SCORE: 0.00 (HUMAN_VERIFIED)</div>
+                    </div>
+                </section>
+
+                <section class="flat-card p-4 space-y-3">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                        <span>// KONTEN SPONSORED REKOMENDASI #01</span>
+                        <span>NATIVE_ADS_FEED</span>
+                    </div>
+                    <div id="ad-slot-native" class="min-h-[180px] ad-unit-box p-4 flex items-center justify-center text-center text-xs font-mono text-zinc-600">
+                        [ADSTERRA_SLOT_07: NATIVE_ADS_GRID]
+                    </div>
+                </section>
+
+                <div class="p-6 border border-zinc-800 bg-zinc-950/60 rounded text-xs text-zinc-400 space-y-3 font-mono">
+                    <h4 class="font-bold text-zinc-200 uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-blue-400"></i> PETUNJUK VERIFIKASI PENGUNDUHAN
+                    </h4>
+                    <p class="leading-relaxed">
+                        Proses enkripsi bertingkat memerlukan waktu beberapa detik pada tiap fasenya. Pastikan Anda tidak menutup halaman browser ini selama timer verifikasi di bagian bawah sedang berjalan. Apabila terjadi kendala penundaan timer, periksa kembali koneksi jaringan atau penyekat iklan (*AdBlocker*) pada perangkat Anda.
+                    </p>
+                </div>
+
+                <section class="flat-card p-4 space-y-3">
+                    <div class="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                        <span>// KONTEN SPONSORED REKOMENDASI #02</span>
+                        <span>PARTNER_NETWORK_ADS</span>
+                    </div>
+                    <div class="min-h-[160px] ad-unit-box p-4 flex items-center justify-center text-center text-xs font-mono text-zinc-600">
+                        [ADSTERRA_SLOT_07_EXTRA: NATIVE_SPONSORED_RECOMMENDATIONS]
+                    </div>
+                </section>
+
+                <div id="bottom-action-zone" class="flat-card p-6 sm:p-8 border-2 border-emerald-500/30 space-y-6 text-center scroll-mt-24 mt-12">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-zinc-900 border border-zinc-700 text-xs font-mono text-emerald-400">
+                            <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+                            <span id="action-zone-status">STATUS: MENUNGGU INISIALISASI VERIFIKASI</span>
+                        </div>
+                        <h3 id="action-zone-title" class="text-base sm:text-lg font-bold font-mono text-zinc-100 pt-2">Area Pemrosesan Kunci &amp; Hitung Mundur</h3>
+                        <p id="action-zone-desc" class="text-xs text-zinc-400 max-w-lg mx-auto leading-relaxed">
+                            Klik banner verifikasi di bagian atas halaman untuk memulai pemindaian dan mengaktifkan timer hitung mundur.
+                        </p>
+                    </div>
+
+                    <div id="timer-box" class="max-w-md mx-auto space-y-3 font-mono hidden">
+                        <div class="flex items-center justify-between text-xs text-zinc-400">
+                            <span id="timer-status-label">MEMINDAI INTEGRITAS BERKAS...</span>
+                            <span id="timer-countdown-text" class="text-amber-400 font-bold">0 Detik</span>
+                        </div>
+                        <div class="w-full h-3 bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800">
+                            <div id="timer-progress-bar" class="h-full bg-amber-500 rounded-full progress-line w-0"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center my-4">
+                        <div id="ad-slot-bottom-action" class="w-[300px] h-[250px] ad-unit-box flex items-center justify-center text-xs font-mono text-zinc-600">
+                            [ADSTERRA_SLOT_BOTTOM_ACTION: BANNER_300x250]
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <div id="btn-proceed-step-2" class="hidden cursor-pointer max-w-lg mx-auto ad-style-btn p-4 border-amber-500/50 hover:border-amber-400 animate-bounce">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 text-left">
+                                    <div class="w-9 h-9 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold font-mono text-xs shrink-0">01</div>
+                                    <div>
+                                        <div class="text-[10px] font-mono text-amber-400 font-bold uppercase">LANGKAH 1 SELESAI</div>
+                                        <div class="text-xs sm:text-sm font-bold font-mono text-white">KLIK DISINI UNTUK LANJUT KE LANGKAH 2</div>
+                                    </div>
+                                </div>
+                                <i data-lucide="arrow-right" class="w-5 h-5 text-amber-400 shrink-0"></i>
+                            </div>
+                        </div>
+
+                        <div id="btn-proceed-step-3" class="hidden cursor-pointer max-w-lg mx-auto ad-style-btn p-4 border-blue-500/50 hover:border-blue-400 animate-bounce">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3 text-left">
+                                    <div class="w-9 h-9 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold font-mono text-xs shrink-0">02</div>
+                                    <div>
+                                        <div class="text-[10px] font-mono text-blue-400 font-bold uppercase">LANGKAH 2 SELESAI</div>
+                                        <div class="text-xs sm:text-sm font-bold font-mono text-white">KLIK DISINI UNTUK LANJUT KE LANGKAH 3</div>
+                                    </div>
+                                </div>
+                                <i data-lucide="arrow-right" class="w-5 h-5 text-blue-400 shrink-0"></i>
+                            </div>
+                        </div>
+
+                        <a id="btn-final-download" href="#" target="_blank" rel="noopener noreferrer" class="hidden max-w-lg mx-auto ad-style-btn p-5 border-emerald-500/80 hover:border-emerald-400 bg-emerald-950/30 flex items-center justify-between gap-3 group transition shadow-xl shadow-emerald-950/50">
+                            <div class="flex items-center gap-3 text-left">
+                                <div class="w-10 h-10 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0">
+                                    <i data-lucide="download" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] font-mono text-emerald-400 font-bold uppercase">VERIFIKASI LENGKAP &bull; LINK TERBUKA</div>
+                                    <div class="text-sm font-bold font-mono text-white group-hover:text-emerald-300">UNDUH BERKAS SEKARANG (DIRECT LINK)</div>
+                                </div>
+                            </div>
+                            <i data-lucide="external-link" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <aside class="lg:col-span-4 space-y-6">
+                <div class="flat-card p-4 space-y-3 font-mono text-xs">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-2 font-bold text-zinc-300">
+                        <span>NODE_METRICS</span>
+                        <span class="text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ONLINE
+                        </span>
+                    </div>
+                    <div class="space-y-2 text-zinc-400">
+                        <div class="flex justify-between">
+                            <span>ENCRYPTION:</span>
+                            <span class="text-zinc-200">AES-256-GCM</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>CURRENT_PHASE:</span>
+                            <span id="metric-phase" class="text-amber-400 font-bold">1 / 3 (INIT)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>VERIFICATION_TOKEN:</span>
+                            <span class="text-zinc-200 font-mono text-[10px]" id="metric-token">0x9F...A24</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>SESSION_TTL:</span>
+                            <span class="text-emerald-400">60 min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flat-card p-3 flex flex-col items-center justify-center text-center">
+                    <div class="text-[10px] font-mono text-zinc-500 mb-2">SPONSORED_SIDEBAR_TOP</div>
+                    <div id="ad-slot-sidebar-1" class="w-[300px] h-[250px] ad-unit-box flex items-center justify-center text-xs font-mono text-zinc-600">
+                        [ADSTERRA_SLOT_08: BANNER_300x250_SIDEBAR_TOP]
+                    </div>
+                </div>
+
+                <div class="flat-card p-3 flex flex-col items-center justify-center text-center">
+                    <div class="text-[10px] font-mono text-zinc-500 mb-2">SPONSORED_SIDEBAR_BOTTOM</div>
+                    <div id="ad-slot-sidebar-2" class="w-[300px] h-[600px] ad-unit-box flex items-center justify-center text-xs font-mono text-zinc-600">
+                        [ADSTERRA_SLOT_09: BANNER_300x600_HALF_PAGE]
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+
+        <section class="w-full flex justify-center items-center pt-4">
+            <div id="ad-slot-footer" class="w-full max-w-[728px] min-h-[90px] ad-unit-box p-2 flex flex-col items-center justify-center text-center text-xs text-zinc-600 font-mono">
+                [ADSTERRA_SLOT_10: BANNER_728x90_FOOTER]
+            </div>
+        </section>
+
+    </main>
+
+    <div id="sticky-ad-bar" class="fixed bottom-0 inset-x-0 z-30 bg-zinc-950/95 border-t border-zinc-800 p-2 flex justify-center items-center">
+        <div id="ad-slot-sticky-bottom" class="w-full max-w-[728px] h-[50px] sm:h-[60px] ad-unit-box flex items-center justify-center text-xs font-mono text-zinc-600">
+            [ADSTERRA_SLOT_11: STICKY_BOTTOM_BANNER_728x60]
+        </div>
+    </div>
+
+    <footer class="border-t border-zinc-800 bg-zinc-950 py-6 text-xs text-zinc-500 font-mono">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div>&copy; <span id="footer-year"></span> GATEWAY_SECURE. ALL RIGHTS RESERVED.</div>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-zinc-300">PRIVACY</a>
+                <a href="#" class="hover:text-zinc-300">TERMS</a>
+                <a href="#" class="hover:text-zinc-300">DMCA</a>
+            </div>
+        </div>
+    </footer>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+    const icons = () => { if (window.lucide?.createIcons) lucide.createIcons(); };
+
+    const state = {
+        linkId: null,
+        session: null,
+        timerSeconds: 10,
+        smartlink: '',
+        ads: {},
+        step: 0,
+        done: [false, false, false],
+        running: [false, false, false],
+    };
+
+    const articlesDB = {
+        1: {
+            title: "Metodologi Kriptografi SHA-256, Validasi Integritas Berkas & Mitigasi Injeksi Payload Terdistribusi",
+            meta: "Diterbitkan: 2026 • Kategori: Keamanan Jaringan & Validasi Payload • Tahap 1/3",
+            content: `
+                <p class="text-zinc-300 leading-relaxed">Dalam arsitektur pendistribusian aset digital berkecepatan tinggi, memastikan keutuhan berkas (<em>data integrity</em>) sebelum dieksekusi di lingkungan pengguna akhir merupakan fondasi paling krusial dalam keamanan aplikasi web modem. Gateway verifikasi ini menerapkan protokol pengecekan ringkasan kriptografi (<em>cryptographic digest verification</em>) dua arah untuk mengeliminasi potensi bahaya <em>Man-in-the-Middle</em> serta manipulasi muatan berniat jahat pada jaringan CDN terdistribusi.</p>
+                <h2 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-wider mt-6 mb-2">1. Pengujian Nilai Hash SHA-256 pada Sisi Server Edge</h2>
+                <p class="text-zinc-300 leading-relaxed">Setiap berkas biner di dalam direktori penyimpanan terdistribusi dihitung nilai ringkasan matematisnya menggunakan algoritma <strong>SHA-256 (Secure Hash Algorithm 256-bit)</strong>. Sebelum tautan dekripsi tahap awal diserahkan kepada browser Anda, node verifikasi membandingkan ringkasan hash saat ini dengan checksum resmi dari pengembang asal guna memvalidasi bahwa tidak ada satu bit pun data yang dimodifikasi selama transit.</p>
+                <div class="my-4 p-4 bg-zinc-950 border border-zinc-800 rounded font-mono text-xs space-y-1.5">
+                    <div class="text-zinc-500">// Simulasi Log Pemeriksaan Checksum Node #01</div>
+                    <div class="text-emerald-400">&gt; INITIALIZING_HASH_CHECK</div>
+                    <div class="text-zinc-300">&gt; SHA256_EXPECTED: 9f2a...c71d</div>
+                    <div class="text-zinc-300">&gt; SHA256_RECEIVED: 9f2a...c71d</div>
+                    <div class="text-emerald-400">&gt; STATUS: MATCH_CONFIRMED (0.002ms) • INTEGRITY_100_PERCENT</div>
+                </div>
+                <h2 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-wider mt-6 mb-2">2. Mitigasi Otomasi Bot dan Scraping Jalur Unduhan</h2>
+                <p class="text-zinc-300 leading-relaxed">Mekanisme verifikasi bertingkat (<em>multi-step verification</em>) dirancang bukan hanya untuk validasi enkripsi, namun juga sebagai metode mitigasi serangan <em>Distributed Denial of Service (DDoS)</em> serta pemindaian bot otomatis (<em>automated link scrapers</em>). Dengan membagi proses dekripsi menjadi 3 fase interaktif, beban lalu lintas server dapat didistribusikan secara efisien sambil memastikan keterlibatan manusia secara valid melalui verifikasi <em>token handshaking</em>.</p>
+                <h2 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-wider mt-6 mb-2">3. Arsitektur Pertukaran Kunci Ephemeral TLS 1.3</h2>
+                <p class="text-zinc-300 leading-relaxed">Sistem kami memanfaatkan protokol enkripsi TLS 1.3 dengan algoritma pertukaran kunci Ephemeral Diffie-Hellman (ECDHE). Pendekatan ini menjamin kriteria <em>Perfect Forward Secrecy (PFS)</em>, di mana setiap sesi verifikasi memiliki kunci simetris unik yang tidak dapat di-decrypt ulang meskipun kunci utama server berhasil diekspos di masa depan.</p>
+                <p class="mt-4 pt-3 border-t border-zinc-800 text-zinc-400 italic">Petunjuk: Klik banner verifikasi sponsored di atas untuk mengaktifkan timer hitung mundur. Layar akan otomatis bergulir ke pemrosesan bawah.</p>`
+        },
+        2: {
+            title: "Infrastruktur Jaringan Multi-Hop, Isolasi Sandbox Memori & Generasi Token Sesi Bertingkat",
+            meta: "Diterbitkan: 2026 • Kategori: Protokol Enkripsi & Token Sesi • Tahap 2/3",
+            content: `
+                <p class="text-zinc-300 leading-relaxed">Tahap pertama verifikasi integritas berkas telah berhasil diselesaikan oleh browser Anda. Pada tahap kedua ini, gateway melanjutkan proses enkripsi dengan melakukan pertukaran kunci ephemeral melalui jaringan perantara terdistribusi (<em>multi-hop node network</em>).</p>
+                <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">1. Dekripsi Partial Payload &amp; Fragmentasi Kunci Kriptografi</h2>
+                <p class="text-zinc-300 leading-relaxed">Kunci enkripsi utama tidak pernah disimpan atau ditransmisikan dalam satu lokasi server tunggal. Sebaliknya, kunci dipecah menjadi beberapa segmen terenkripsi (<em>sharded keys</em>) yang hanya disatukan secara runtime saat browser menyelesaikan urutan pemindaian sesi bertingkat. Hal ini menjamin bahwa tautan tidak dapat di-bypass atau di-hotlink secara langsung oleh pihak ketiga tanpa melewati siklus verifikasi penuh.</p>
+                <div class="my-4 p-4 bg-zinc-950 border border-zinc-800 rounded font-mono text-xs space-y-1.5">
+                    <div class="text-zinc-500">// Simulasi Generasi Kunci Ephemeral Phase 2</div>
+                    <div class="text-blue-400">&gt; DECRYPT_STAGE_2: GENERATING_ECDHE_PAIR</div>
+                    <div class="text-zinc-300">&gt; SESSION_TOKEN: 8f9a2b7c4d1e-STEP2-VERIFIED</div>
+                    <div class="text-zinc-300">&gt; SHARD_PAYLOAD_HASH: 0x4A81B92C...89FE</div>
+                    <div class="text-blue-400">&gt; RTT_LATENCY: 14ms • HOP_COUNT: 3 NODES</div>
+                </div>
+                <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">2. Perlindungan Layer 7 Rate Limiting &amp; Sandbox Runtime Browser</h2>
+                <p class="text-zinc-300 leading-relaxed">Sistem kami memantau setiap permintaan unduhan melalui firewall aplikasi web (WAF) berbasis kecerdasan heuristik. Setiap alamat IP dibatasi (<em>rate-limited</em>) untuk mencegah banjir unduhan bersamaan yang dapat menurunkan kinerja node untuk pengguna lain. Verifikasi tahap kedua ini memvalidasi keaslian header HTTP dan sidik jari TLS (<em>TLS Fingerprinting</em>) dari perangkat Anda.</p>
+                <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">3. Manajemen Cache CDN Edge &amp; Revalidation Protocol</h2>
+                <p class="text-zinc-300 leading-relaxed">Server Edge kami secara otomatis menyegarkan header <em>Cache-Control: private, no-transform</em> pada setiap payload yang diunduh. Hal ini mencegah proxy perantara menyimpan salinan usang atau merusak struktur kompresi berkas saat proses transit antar wilayah geografis.</p>
+                <p class="mt-4 pt-3 border-t border-zinc-800 text-zinc-400 italic">Petunjuk: Klik banner verifikasi Tahap 2 di atas untuk mengaktifkan pemindaian dekripsi kedua di area bawah.</p>`
+        },
+        3: {
+            title: "Standardisasi Dekripsi Akhir Payload, Otorisasi Akses Direct CDN & Lisensi Token 24 Jam",
+            meta: "Diterbitkan: 2026 • Kategori: Final Payload Unlocking & Direct Edge Access • Tahap 3/3",
+            content: `
+                <p class="text-zinc-300 leading-relaxed">Seluruh rangkaian pemindaian keamanan, keutuhan hash, dan verifikasi enkripsi bertingkat telah selesai divalidasi oleh infrastruktur gateway kami. Sesi Anda kini berada dalam status terverifikasi penuh (<em>Fully Authenticated Session</em>).</p>
+                <h2 class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider mt-6 mb-2">1. Penyatuan Fragmentasi Kunci Dekripsi AES-256-GCM</h2>
+                <p class="text-zinc-300 leading-relaxed">Token dari Tahap 1 dan Tahap 2 telah berhasil digabungkan oleh modul kriptografi di sisi server Edge. Tautan asli yang dituju telah di-unmask dan siap diserahkan secara langsung tanpa perantara tambahan.</p>
+                <div class="my-4 p-4 bg-zinc-950 border border-zinc-800 rounded font-mono text-xs space-y-1.5">
+                    <div class="text-zinc-500">// Log Keberhasilan Otorisasi Final</div>
+                    <div class="text-emerald-400">&gt; COMBINING_TOKEN_SHARDS: [SHARD_1] + [SHARD_2] -&gt; SUCCESS</div>
+                    <div class="text-zinc-300">&gt; PAYLOAD_STATUS: UNLOCKED_AND_READY</div>
+                    <div class="text-zinc-300">&gt; DIRECT_URL_DISPATCHED: EDGE_CDN</div>
+                    <div class="text-emerald-400">&gt; SESSION_EXPIRY: 60_MIN_LEAD_TIME</div>
+                </div>
+                <h2 class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider mt-6 mb-2">2. Ketentuan Masa Berlaku Sesi Unduhan &amp; Kebijakan Cache</h2>
+                <p class="text-zinc-300 leading-relaxed">Tautan unduhan final akan diantar lewat redirect sekali pakai dari gateway. Setelah sesi verifikasi berakhir, token dibersihkan dari memori cache untuk menjaga keamanan jaringan, dan Anda dapat melakukan verifikasi ulang kapan saja jika membutuhkan berkas kembali.</p>
+                <p class="mt-4 text-emerald-400 font-mono font-bold leading-relaxed">&gt; Klik banner hijau "UNDUH BERKAS SEKARANG" di bagian bawah untuk langsung memulai pengunduhan file asli Anda secara cepat dan aman.</p>`
+        }
+    };
+
+    function showToast(message, type = 'info') {
+        const container = $('toast-container');
+        if (!container) return;
+        const bg = type === 'error' ? 'bg-red-950/90 border-red-700 text-red-200'
+            : type === 'success' ? 'bg-emerald-950/90 border-emerald-700 text-emerald-200'
+            : 'bg-zinc-900/90 border-zinc-700 text-zinc-200';
+        const toast = document.createElement('div');
+        toast.className = `p-3 rounded border font-mono text-xs shadow-xl flex items-center justify-between gap-3 min-w-[260px] pointer-events-auto transition-all duration-300 ${bg}`;
+        toast.innerHTML = `<span></span><button type="button" class="text-zinc-400 hover:text-white">&times;</button>`;
+        toast.firstElementChild.textContent = message;
+        toast.lastElementChild.onclick = () => toast.remove();
+        container.appendChild(toast);
+        setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
+    }
+
+    function renderStepArticle(step) {
+        const article = articlesDB[step];
+        const container = $('article-content-container');
+        if (!article || !container) return;
+        container.innerHTML = `
+            <header class="border-b border-zinc-800 pb-3 space-y-1">
+                <div class="text-[11px] font-mono text-emerald-400">// DOCUMENTATION_STEP_0${step}</div>
+                <h1 class="text-base sm:text-lg font-bold font-mono text-zinc-100">${article.title}</h1>
+                <div class="text-[11px] text-zinc-500 font-mono">${article.meta}</div>
+            </header>
+            ${article.content}`;
+        $('ad-unit-label').textContent = `SLOT_STEP_0${step}`;
+        icons();
+    }
+
+    const scrollToZone = () =>
+        $('bottom-action-zone')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const setStatus = (text, color) => {
+        const el = $('action-zone-status');
+        el.textContent = text;
+        el.className = `font-bold ${color}`;
+    };
+
+    function openSmartlink() {
+        if (!state.smartlink) return;
+        const w = window.open(state.smartlink, '_blank', 'noopener');
+        if (w) w.opener = null;
+    }
+
+    // Skrip iklan dari dashboard admin. Admin adalah satu-satunya penulis nilai
+    // ini, jadi isinya diperlakukan sebagai tepercaya.
+    function injectScript(containerId, html) {
+        const container = $(containerId);
+        if (!container || !html) return;
+        container.innerHTML = html;
+        container.querySelectorAll('script').forEach((old) => {
+            const fresh = document.createElement('script');
+            for (const attr of old.attributes) fresh.setAttribute(attr.name, attr.value);
+            fresh.textContent = old.textContent;
+            old.parentNode.replaceChild(fresh, old);
+        });
+    }
+
+    function applyAds(ads) {
+        state.smartlink = ads.smartlink || '';
+        state.timerSeconds = Math.min(60, Math.max(3, Number(ads.timerSeconds) || 10));
+        if (ads.bannerHeader) {
+            injectScript('ad-slot-header', ads.bannerHeader);
+            injectScript('ad-slot-footer', ads.bannerHeader);
+        }
+        if (ads.bannerMiddle) {
+            injectScript('ad-slot-middle-dynamic', ads.bannerMiddle);
+            injectScript('ad-slot-bottom-action', ads.bannerMiddle);
+            injectScript('ad-slot-sidebar-1', ads.bannerMiddle);
+            injectScript('ad-slot-sidebar-2', ads.bannerMiddle);
+        }
+        if (ads.bannerPopunder) injectScript('adsterra-popunder-container', ads.bannerPopunder);
+    }
+
+    let countdown = null;
+    function runCountdown(step, onDone) {
+        clearInterval(countdown);
+        const total = state.timerSeconds;
+        const box = $('timer-box');
+        const label = $('timer-status-label');
+        const text = $('timer-countdown-text');
+        const bar = $('timer-progress-bar');
+
+        box.classList.remove('hidden');
+        label.textContent = 'MEMINDAI INTEGRITAS BERKAS...';
+        bar.className = 'h-full rounded-full progress-line w-0 ' + ['bg-amber-500', 'bg-blue-500', 'bg-emerald-500'][step - 1];
+        text.className = ['text-amber-400', 'text-blue-400', 'text-emerald-400'][step - 1] + ' font-bold';
+
+        let left = total;
+        text.textContent = `${left} Detik`;
+        countdown = setInterval(() => {
+            left -= 1;
+            bar.style.width = `${((total - left) / total) * 100}%`;
+            text.textContent = `${Math.max(left, 0)} Detik`;
+            if (left <= 0) {
+                clearInterval(countdown);
+                onDone();
+            }
+        }, 1000);
+    }
+
+    async function reportStep(step) {
+        const res = await fetch('/api/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session: state.session, step }),
+        });
+        if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.error || 'Verifikasi ditolak server');
+        }
+    }
+
+    function startStep(step) {
+        if (state.done[step]) { scrollToZone(); return; }
+        if (state.running[step]) { scrollToZone(); return; }
+        state.running[step] = true;
+
+        openSmartlink();
+        scrollToZone();
+
+        reportStep(step).catch((err) => {
+            state.running[step] = false;
+            showToast(err.message, 'error');
+        });
+
+        const colors = ['text-amber-400', 'text-blue-400', 'text-emerald-400'];
+        const titles = ['Memproses Token Tahap 1...', 'Memproses Token Tahap 2...', 'Memproses Dekripsi Final...'];
+        const statuses = [
+            'STATUS: MEMINDAI SOKET KEAMANAN (STEP 1/3)',
+            'STATUS: MENYEIMBANGKAN HASH PAYLOAD (STEP 2/3)',
+            'STATUS: MEMBUKA KUNCI FINAL (STEP 3/3)',
+        ];
+        setStatus(statuses[step - 1], colors[step - 1]);
+        $('action-zone-title').textContent = titles[step - 1];
+
+        $(step === 1 ? 'btn-proceed-step-2' : 'btn-proceed-step-3').classList.add('hidden');
+        $('btn-final-download').classList.add('hidden');
+
+        runCountdown(step, () => {
+            state.done[step] = true;
+            state.running[step] = false;
+            if (step === 1) {
+                setStatus('STATUS: TAHAP 1 SELESAI! KLIK BANNER DI BAWAH', 'text-amber-400');
+                $('btn-proceed-step-2').classList.remove('hidden');
+                showToast('Langkah 1 Selesai! Klik tombol lanjut di bawah.', 'success');
+            } else if (step === 2) {
+                setStatus('STATUS: TAHAP 2 SELESAI! KLIK BANNER DI BAWAH', 'text-blue-400');
+                $('btn-proceed-step-3').classList.remove('hidden');
+                showToast('Langkah 2 Selesai! Klik tombol lanjut di bawah.', 'success');
+            } else {
+                setStatus('STATUS: TAUTAN FINAL BERHASIL DIDEKRIPSI!', 'text-emerald-400');
+                $('action-zone-title').textContent = 'Berkas Siap Diunduh!';
+                $('action-zone-desc').textContent = 'Verifikasi 3 tahap selesai. Klik banner hijau di bawah untuk mengunduh berkas Anda.';
+                const btn = $('btn-final-download');
+                btn.href = `/api/go?id=${encodeURIComponent(state.linkId)}&s=${encodeURIComponent(state.session)}`;
+                btn.classList.remove('hidden');
+                showToast('Tautan berhasil dibuka! Klik tombol hijau di bawah.', 'success');
+            }
+        });
+    }
+
+    function goToStep(step) {
+        state.step = step;
+        renderStepArticle(step);
+
+        const palette = [
+            null,
+            ['text-amber-400', '1 / 3 (INIT)'],
+            ['text-blue-400', '2 / 3 (DECRYPT)'],
+            ['text-emerald-400', '3 / 3 (FINAL)'],
+        ][step];
+        $('step-badge').textContent = `LANGKAH ${step} / 3`;
+        $('step-badge').className = `${palette[0]} font-bold`;
+        $('metric-phase').textContent = palette[1];
+        $('metric-phase').className = `${palette[0]} font-bold`;
+        $('metric-token').textContent = '0x' + (state.session || '').slice(0, 2).toUpperCase() + '...' + (state.session || '').slice(-3).toUpperCase();
+
+        for (let s = 1; s <= 3; s += 1) {
+            $(`trigger-step-${s}`).classList.toggle('hidden', s !== step);
+        }
+        $('timer-box').classList.add('hidden');
+        $('btn-proceed-step-2').classList.add('hidden');
+        $('btn-proceed-step-3').classList.add('hidden');
+        $('btn-final-download').classList.add('hidden');
+
+        setStatus(`STATUS: MENUNGGU VERIFIKASI TAHAP ${step}`, palette[0]);
+        $('action-zone-title').textContent = `Area Pemrosesan Kunci Tahap ${step}`;
+        $('action-zone-desc').textContent = `Klik banner verifikasi Langkah ${step} di bagian atas halaman untuk melanjutkan.`;
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showToast(`Tahap ${step - 1} Berhasil! Silakan klik banner verifikasi Langkah ${step}.`, 'success');
+    }
+
+    function fatal(title, message) {
+        $('step-top-action-container').classList.add('hidden');
+        $('article-content-container').innerHTML = `
+            <div class="text-center space-y-3 py-10">
+                <i data-lucide="alert-triangle" class="w-10 h-10 mx-auto text-amber-400"></i>
+                <h1 class="font-mono font-bold text-lg text-zinc-100">${title}</h1>
+                <p class="text-zinc-400">${message}</p>
+            </div>`;
+        setStatus('STATUS: GATE DITUTUP', 'text-red-400');
+        $('action-zone-title').textContent = title;
+        $('action-zone-desc').textContent = message;
+        $('btn-final-download').classList.add('hidden');
+        icons();
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        icons();
+        $('footer-year').textContent = new Date().getFullYear();
+
+        $('btn-step-1').onclick = () => startStep(1);
+        $('btn-step-2').onclick = () => startStep(2);
+        $('btn-step-3').onclick = () => startStep(3);
+        $('btn-proceed-step-2').onclick = () => goToStep(2);
+        $('btn-proceed-step-3').onclick = () => goToStep(3);
+
+        renderStepArticle(1);
+
+        // Config iklan dan metadata link diambil bersamaan, dan tombol verifikasi
+        // baru aktif setelah keduanya selesai. Kalau tombolnya bisa diklik lebih
+        // dulu, smartlink belum terpasang sehingga klik iklan hilang.
+        const id = new URLSearchParams(location.search).get('id');
+        if (!id) {
+            fatal('Link tidak lengkap', 'Buka halaman safelink melalui tautan yang diberikan. Parameter <span class="font-mono text-amber-400">?id=</span> tidak ditemukan pada URL.');
+            return;
+        }
+
+        const [adsResult, linkResult] = await Promise.allSettled([
+            fetch('/api/ads').then((r) => r.json()).then(applyAds),
+            fetch(`/api/resolve?id=${encodeURIComponent(id)}`),
+        ]);
+
+        if (linkResult.status === 'rejected') {
+            fatal('Tidak dapat menghubungi gateway', 'Periksa koneksi internet Anda lalu muat ulang halaman ini.');
+            return;
+        }
+
+        const res = linkResult.value;
+        const data = await res.json();
+        if (!res.ok) {
+            const offline = res.status === 503;
+            fatal(offline ? 'Gateway belum siap' : 'Link tidak tersedia', data.error || 'Terjadi kesalahan yang tidak diketahui.');
+            return;
+        }
+
+        state.linkId = data.id;
+        state.session = data.session;
+        $('file-title-display').textContent = data.name || 'FILE';
+        $('file-size-display').textContent = `SIZE: ${data.size || '-'}`;
+        $('metric-token').textContent = '0x' + data.session.slice(0, 2).toUpperCase() + '...' + data.session.slice(-3).toUpperCase();
+
+        if (adsResult.status === 'rejected') {
+            showToast('Unit iklan gagal dimuat, verifikasi tetap bisa berjalan.', 'info');
+        }
+        $('btn-step-1').disabled = false;
+    });
+</script>
+</body>
+</html>
