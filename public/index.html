@@ -83,7 +83,7 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full flex-grow space-y-8">
 
-        <section class="w-full flex justify-center items-center">
+        <section id="ad-section-header" class="w-full flex justify-center items-center">
             <div id="ad-slot-header" class="w-full max-w-[728px] min-h-[90px] ad-unit-box p-2 flex flex-col items-center justify-center text-center text-xs text-zinc-500 font-mono">
                 [ADSTERRA_SLOT_01: BANNER_728x90_HEADER]
             </div>
@@ -197,7 +197,7 @@
 
                 <article id="article-content-container" class="flat-card p-6 sm:p-8 space-y-6 text-zinc-300 text-xs sm:text-sm leading-relaxed page-fade"></article>
 
-                <section class="flat-card p-4 space-y-2">
+                <section id="ad-section-mid" class="flat-card p-4 space-y-2">
                     <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500">
                         <span>// DYNAMIC_IN_CONTENT_AD_UNIT</span>
                         <span id="ad-unit-label">SLOT_GATE_01</span>
@@ -232,7 +232,7 @@
                     </div>
                 </section>
 
-                <section class="flat-card p-4 space-y-3">
+                <section id="ad-section-native" class="flat-card p-4 space-y-3">
                     <div class="flex items-center justify-between text-[11px] font-mono text-zinc-500">
                         <span>// KONTEN SPONSORED REKOMENDASI #01</span>
                         <span>NATIVE_ADS_FEED</span>
@@ -251,12 +251,12 @@
                     </p>
                 </div>
 
-                <section class="flat-card p-4 space-y-3">
+                <section id="ad-section-native-2" class="flat-card p-4 space-y-3">
                     <div class="flex items-center justify-between text-[11px] font-mono text-zinc-500">
                         <span>// KONTEN SPONSORED REKOMENDASI #02</span>
                         <span>PARTNER_NETWORK_ADS</span>
                     </div>
-                    <div class="min-h-[160px] ad-unit-box p-4 flex items-center justify-center text-center text-xs font-mono text-zinc-600">
+                    <div id="ad-slot-native-2" class="min-h-[160px] ad-unit-box p-4 flex items-center justify-center text-center text-xs font-mono text-zinc-600">
                         [ADSTERRA_SLOT_07_EXTRA: NATIVE_SPONSORED_RECOMMENDATIONS]
                     </div>
                 </section>
@@ -275,7 +275,7 @@
                     </div>
 
                     <!-- 1 IKLAN + 1 TOMBOL ASLI, berdampingan -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-3xl mx-auto pt-2">
+                    <div id="bottom-layout" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center max-w-3xl mx-auto pt-2">
                         <div id="ad-slot-bottom-action" class="w-full max-w-[300px] h-[250px] ad-unit-box mx-auto md:mx-auto flex items-center justify-center text-xs font-mono text-zinc-600">
                             [ADSTERRA_SLOT_BOTTOM_ACTION: BANNER_300x250]
                         </div>
@@ -339,14 +339,14 @@
                     </div>
                 </div>
 
-                <div class="flat-card p-3 flex flex-col items-center justify-center text-center">
+                <div id="ad-section-sidebar-1" class="flat-card p-3 flex flex-col items-center justify-center text-center">
                     <div class="text-[10px] font-mono text-zinc-500 mb-2">SPONSORED_SIDEBAR_TOP</div>
                     <div id="ad-slot-sidebar-1" class="w-[300px] h-[250px] ad-unit-box flex items-center justify-center text-xs font-mono text-zinc-600">
                         [ADSTERRA_SLOT_08: BANNER_300x250_SIDEBAR_TOP]
                     </div>
                 </div>
 
-                <div class="flat-card p-3 flex flex-col items-center justify-center text-center">
+                <div id="ad-section-sidebar-2" class="flat-card p-3 flex flex-col items-center justify-center text-center">
                     <div class="text-[10px] font-mono text-zinc-500 mb-2">SPONSORED_SIDEBAR_BOTTOM</div>
                     <div id="ad-slot-sidebar-2" class="w-[300px] h-[600px] ad-unit-box flex items-center justify-center text-xs font-mono text-zinc-600">
                         [ADSTERRA_SLOT_09: BANNER_300x600_HALF_PAGE]
@@ -356,7 +356,7 @@
 
         </div>
 
-        <section class="w-full flex justify-center items-center pt-4">
+        <section id="ad-section-footer" class="w-full flex justify-center items-center pt-4">
             <div id="ad-slot-footer" class="w-full max-w-[728px] min-h-[90px] ad-unit-box p-2 flex flex-col items-center justify-center text-center text-xs text-zinc-600 font-mono">
                 [ADSTERRA_SLOT_10: BANNER_728x90_FOOTER]
             </div>
@@ -530,6 +530,21 @@
         });
     }
 
+    // Isi kode iklan ke slot; kalau kosong, slot beserta bingkainya disembunyikan
+    // supaya tidak ada kotak putus-putus kosong mengambang di halaman.
+    function fillSlot(sectionId, containerId, code) {
+        const section = sectionId ? $(sectionId) : null;
+        const box = $(containerId);
+        if (!code) {
+            if (section) section.classList.add('hidden');
+            if (box) box.classList.add('hidden');
+            return;
+        }
+        if (section) section.classList.remove('hidden');
+        if (box) box.classList.remove('hidden');
+        injectScript(containerId, code);
+    }
+
     function applyAds(gate) {
         const c = state.adConfig;
         if (!c) return;
@@ -549,24 +564,22 @@
         const halfpage = g.halfpage || c.bannerHalfpage || middle;
         const sticky = c.bannerSticky || c.bannerMobile || '';
 
-        if (header) {
-            injectScript('ad-slot-header', header);
-            injectScript('ad-slot-footer', header);
-        }
-        if (konten) {
-            injectScript('ad-slot-middle-dynamic', konten);
-        }
-        if (middle) {
-            injectScript('ad-slot-bottom-action', middle);
-            injectScript('ad-slot-sidebar-1', middle);
-        }
-        if (halfpage) {
-            injectScript('ad-slot-sidebar-2', halfpage);
-        }
-        if (native) {
-            injectScript('ad-slot-native', native);
-        }
-        if (sticky) injectScript('ad-slot-sticky-bottom', sticky);
+        fillSlot('ad-section-header', 'ad-slot-header', header);
+        fillSlot('ad-section-footer', 'ad-slot-footer', header);
+        fillSlot('ad-section-mid', 'ad-slot-middle-dynamic', konten);
+        fillSlot('ad-section-native', 'ad-slot-native', native);
+        fillSlot('ad-section-native-2', 'ad-slot-native-2', native);
+        fillSlot(null, 'ad-slot-bottom-action', middle);
+        fillSlot('ad-section-sidebar-1', 'ad-slot-sidebar-1', middle);
+        fillSlot('ad-section-sidebar-2', 'ad-slot-sidebar-2', halfpage);
+        fillSlot(null, 'ad-slot-sticky-bottom', sticky);
+
+        // Sticky bar ikut hilang bila tidak ada kode.
+        $('sticky-ad-bar').classList.toggle('hidden', !sticky);
+        // Kalau iklan di samping tombol unduh kosong, tombolnya melebar sendiri.
+        $('bottom-layout').classList.toggle('md:grid-cols-1', !middle);
+        $('bottom-layout').classList.toggle('md:grid-cols-2', !!middle);
+
         if ((c.popunderGates || []).includes(gate) && c.bannerPopunder) {
             injectScript('adsterra-popunder-container', c.bannerPopunder);
         }
@@ -576,7 +589,7 @@
         const id = encodeURIComponent(state.id);
         const s = encodeURIComponent(state.session);
         if (g === 1) return `/?id=${id}${state.session ? `&s=${s}` : ''}`;
-        if (g === 2 || g === 3) return `/${state.nextTicket}?id=${id}&s=${s}`;
+        if (g === 2 || g === 3) return state.nextTicket ? `/${state.nextTicket}?id=${id}&s=${s}` : `/?id=${id}&s=${s}`;
         return `/?id=${id}`;
     }
 
@@ -677,6 +690,7 @@
             try {
                 const r = await reportStep(gate);
                 state.running = false;
+                $(`trigger-gate-${gate}`).classList.add('hidden');
                 showToast(r.unlocked ? 'Tautan berhasil dibuka!' : `Tahap ${gate} selesai!`, 'success');
                 revealProceed(gate);
             } catch (err) {
@@ -685,6 +699,20 @@
                 showToast(err.message + ' Silakan coba lagi atau muat ulang halaman.', 'error');
             }
         });
+    }
+
+    // Gate sudah pernah diselesaikan: tidak perlu hitung mundur lagi.
+    // Ambil ticket segar (idempoten) lalu langsung tampilkan tombol bawah.
+    async function skipCountdown(gate) {
+        if (!state.nextTicket && state.steps < 3) {
+            try {
+                const r = await reportStep(gate);
+                state.steps = r.steps;
+                if (r.ticket) state.nextTicket = r.ticket;
+            } catch { /* sesi mungkin lewat; tombol tetap muncul untuk percobaan */ }
+        }
+        $(`trigger-gate-${gate}`).classList.add('hidden');
+        revealProceed(gate);
     }
 
     function renderGate(gate) {
@@ -703,8 +731,17 @@
         $('metric-token-side').textContent = '0x' + tok;
         renderArticle(gate);
 
-        // Tiap gate selalu butuh satu klik verifikasi — juga saat dikunjungi
-        // ulang (idempoten di server) — supaya ticket path URL selalu segar.
+        // Kalau sesi sudah tuntas penuh, satu-satunya halaman sah adalah gate 3
+        // (server tetap merendernya dari sesi walau tanpa ticket).
+        if (state.steps >= 3 && gate < 3) {
+            location.replace(urlFor(1));
+            return;
+        }
+        if (state.steps >= gate) {
+            skipCountdown(gate);
+            return;
+        }
+
         const btn = $(`btn-verify-${gate}`);
         btn.disabled = !state.session;
         btn.classList.remove('cursor-wait');
