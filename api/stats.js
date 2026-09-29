@@ -21,10 +21,11 @@ export default async function handler(req, res) {
   const days = [];
   for (let i = 6; i >= 0; i -= 1) days.push(dayKey(-i));
 
+  // Pipeline Upstash memakai rantai perintah, bukan array.
+  const p = redis().pipeline();
+  live.forEach((l) => p.hgetall(`st:${l.id}`));
   const [funnels, daily, cfg] = await Promise.all([
-    live.length
-      ? redis().pipeline(live.map((l) => redis().hgetall(`st:${l.id}`))).exec()
-      : Promise.resolve([]),
+    live.length ? p.exec() : Promise.resolve([]),
     redis().mget(days.flatMap((d) => [`d:${d}:v`, `d:${d}:c`])),
     redis().get('config:ads'),
   ]);

@@ -71,8 +71,15 @@ function fakeRedis() {
     async mget(keys) {
       return Promise.all(keys.map((k) => api.get(k)));
     },
-    pipeline(cmds) {
-      return { exec: async () => Promise.all(cmds) };
+    pipeline() {
+      const cmds = [];
+      return {
+        hgetall: (k) => {
+          cmds.push(api.hgetall(k));
+          return this;
+        },
+        exec: async () => Promise.all(cmds),
+      };
     },
   };
   return api;

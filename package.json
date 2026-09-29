@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Safelink download gate with Adsterra monetisation, admin dashboard and server-side link protection.",
   "engines": {
-    "node": "20"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "vercel dev",
