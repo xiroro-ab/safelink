@@ -4,7 +4,9 @@
   "buildCommand": null,
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" }
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/decrypt/:id", "destination": "/index.html" },
+    { "source": "/unlock/:id", "destination": "/index.html" }
   ],
   "headers": [
     {

@@ -386,10 +386,16 @@
     const icons = () => { if (window.lucide?.createIcons) lucide.createIcons(); };
 
     const q = new URLSearchParams(location.search);
+
+    // Gate ditentukan oleh path URL, bukan angka query:
+    //   /            -> gate 1 (tautan yang dibagikan)
+    //   /decrypt/ID  -> gate 2
+    //   /unlock/ID   -> gate 3
+    const pathGate = location.pathname.match(/^\/(decrypt|unlock)\/([^/]+)$/);
     const state = {
-        id: (q.get('id') || '').trim(),
+        id: (pathGate ? decodeURIComponent(pathGate[2]) : q.get('id') || '').trim(),
         session: (q.get('s') || '').trim(),
-        gate: Math.min(3, Math.max(1, parseInt(q.get('g'), 10) || 1)),
+        gate: pathGate ? (pathGate[1] === 'decrypt' ? 2 : 3) : 1,
         steps: 0,
         timerSeconds: 10,
         smartlink: '',
@@ -541,8 +547,12 @@
         if (ads.bannerPopunder) injectScript('adsterra-popunder-container', ads.bannerPopunder);
     }
 
-    function urlFor(gate) {
-        return `/?id=${encodeURIComponent(state.id)}&s=${encodeURIComponent(state.session)}&g=${gate}`;
+    function urlFor(g) {
+        const id = encodeURIComponent(state.id);
+        const s = encodeURIComponent(state.session);
+        if (g === 1) return `/?id=${id}${state.session ? `&s=${s}` : ''}`;
+        if (g === 2) return `/decrypt/${id}?s=${s}`;
+        return `/unlock/${id}?s=${s}`;
     }
 
     function fatal(title, message) {
@@ -662,7 +672,7 @@
         $('step-badge').className = `${PALETTE[gate].color} font-bold`;
         $('metric-phase').textContent = `${gate} / 3`;
         $('metric-phase').className = `${PALETTE[gate].color} font-bold`;
-        $('metric-gate-url').textContent = `/ ?id=${state.id}&g=${gate}`;
+        $('metric-gate-url').textContent = urlFor(gate);
         const tok = state.session ? state.session.slice(0, 4).toUpperCase() + '...' + state.session.slice(-3).toUpperCase() : '0x9F...A24';
         $('metric-token').textContent = '0x' + tok;
         $('metric-token-side').textContent = '0x' + tok;
