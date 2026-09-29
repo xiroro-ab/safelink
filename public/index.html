@@ -385,21 +385,19 @@
     const $ = (id) => document.getElementById(id);
     const icons = () => { if (window.lucide?.createIcons) lucide.createIcons(); };
 
-    const q = new URLSearchParams(location.search);
-
-    // Gate ditentukan oleh path URL, bukan angka query:
-    //   /            -> gate 1 (tautan yang dibagikan)
-    //   /decrypt/ID  -> gate 2
-    //   /unlock/ID   -> gate 3
-    const pathGate = location.pathname.match(/^\/(decrypt|unlock)\/([^/]+)$/);
+    // Path URL adalah ticket acak yang hanya diterbitkan server saat gate
+    // sebelumnya selesai. Gate sesungguhnya ditentukan server (data.gate).
+    const pathTicket = location.pathname.match(/^\/([A-Za-z0-9_-]{8,64})$/);
     const state = {
-        id: (pathGate ? decodeURIComponent(pathGate[2]) : q.get('id') || '').trim(),
-        session: (q.get('s') || '').trim(),
-        gate: pathGate ? (pathGate[1] === 'decrypt' ? 2 : 3) : 1,
+        id: (new URLSearchParams(location.search).get('id') || '').trim(),
+        session: (new URLSearchParams(location.search).get('s') || '').trim(),
+        ticket: pathTicket ? pathTicket[1] : '',
+        gate: 1,
         steps: 0,
         timerSeconds: 10,
         smartlink: '',
         running: false,
+        nextTicket: '',
     };
 
     const PALETTE = [
@@ -551,8 +549,8 @@
         const id = encodeURIComponent(state.id);
         const s = encodeURIComponent(state.session);
         if (g === 1) return `/?id=${id}${state.session ? `&s=${s}` : ''}`;
-        if (g === 2) return `/decrypt/${id}?s=${s}`;
-        return `/unlock/${id}?s=${s}`;
+        if (g === 2 || g === 3) return `/${state.nextTicket}?id=${id}&s=${s}`;
+        return `/?id=${id}`;
     }
 
     function fatal(title, message) {
@@ -605,6 +603,7 @@
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(body.error || 'Verifikasi ditolak server');
         state.steps = body.steps;
+        if (body.ticket) state.nextTicket = body.ticket;
         return body;
     }
 
@@ -645,7 +644,6 @@
 
     function startVerification(gate) {
         if (state.running) return;
-        if (state.steps >= gate) { revealProceed(gate); return; }
         state.running = true;
         openSmartlink();
         runCountdown(gate, async () => {
@@ -678,16 +676,13 @@
         $('metric-token-side').textContent = '0x' + tok;
         renderArticle(gate);
 
-        // Kalau gate ini belum diverifikasi, aktifkan tombolnya (jika sesi siap).
-        if (state.steps < gate) {
-            const btn = $(`btn-verify-${gate}`);
-            btn.disabled = !state.session;
-            btn.classList.remove('cursor-wait');
-            btn.classList.add('cursor-pointer');
-            btn.onclick = () => startVerification(gate);
-        } else {
-            revealProceed(gate);
-        }
+        // Tiap gate selalu butuh satu klik verifikasi — juga saat dikunjungi
+        // ulang (idempoten di server) — supaya ticket path URL selalu segar.
+        const btn = $(`btn-verify-${gate}`);
+        btn.disabled = !state.session;
+        btn.classList.remove('cursor-wait');
+        btn.classList.add('cursor-pointer');
+        btn.onclick = () => startVerification(gate);
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -703,7 +698,7 @@
 
         const [adsResult, linkResult] = await Promise.allSettled([
             fetch('/api/ads').then((r) => r.json()).then(applyAds).catch(() => {}),
-            fetch(`/api/resolve?id=${encodeURIComponent(state.id)}&s=${encodeURIComponent(state.session)}`),
+            fetch(`/api/resolve?id=${encodeURIComponent(state.id)}&s=${encodeURIComponent(state.session)}${state.ticket ? `&t=${encodeURIComponent(state.ticket)}` : ''}`),
         ]);
 
         if (linkResult.status === 'rejected') {
@@ -720,13 +715,14 @@
 
         state.session = data.session;
         state.steps = data.steps;
+        state.gate = Math.max(1, Math.min(3, data.gate || 1));
         $('file-title-display').textContent = data.name || 'FILE';
         $('file-size-display').textContent = `SIZE: ${data.size || '-'}`;
 
-        // Server adalah sumber kebenaran: URL gate tidak boleh melompati progres.
-        const allowed = data.steps + 1;
-        if (state.gate > allowed) {
-            location.replace(urlFor(allowed));
+        // Kalau URL berisi ticket sembarang dan server menurunkan ke gate 1,
+        // bersihkan URL supaya pengunjung kembali ke tautan resmi.
+        if (state.ticket && state.gate === 1) {
+            location.replace(urlFor(1));
             return;
         }
 

@@ -5,8 +5,7 @@
   "outputDirectory": "public",
   "rewrites": [
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/decrypt/:id", "destination": "/index.html" },
-    { "source": "/unlock/:id", "destination": "/index.html" }
+    { "source": "/:ticket", "destination": "/index.html" }
   ],
   "headers": [
     {

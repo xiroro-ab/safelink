@@ -11,11 +11,14 @@
 } from './_lib.js';
 
 /**
- * Dipanggil di tiap halaman gate (?id=X&s=sesi&g=N).
- * Kalau sesi yang dipakai masih hidup untuk link yang sama, kembalikan progres
- * tanpa menghitung kunjungan baru — supaya pindah gate 1 -> 2 -> 3 tidak
- * menggembungkan statistik view. Session baru (kunjungan baru) hanya dibuat
- * bila tidak ada sesi valid.
+ * Dipanggil di tiap halaman gate.
+ * - URL publik : /?id=X  (gate 1)
+ * - Gate 2/3   : /<ticket>?id=X&s=<sesi>
+ *
+ * Ticket adalah string acak yang hanya diterbitkan server saat gate sebelumnya
+ * diselesaikan (lihat track.js). Tanpa ticket valid + sesi yang benar, halaman
+ * selalu diturunkan ke gate 1. Jadi mengetik /xxx langsung tidak akan pernah
+ * sampai ke gate 3.
  */
 export default async function handler(req, res) {
   if (req.method !== 'GET') return fail(res, 405, 'Method not allowed');
@@ -27,19 +30,39 @@ export default async function handler(req, res) {
   if (link.status !== 'ACTIVE') return fail(res, 410, 'Link ini sedang dinonaktifkan');
 
   const given = (req.query.s || '').toString();
-  if (given.length >= 8 && given.length <= 64) {
-    const sess = await redis().get(`s:${given}`);
-    if (sess && sess.id === link.id) {
+  const givenTicket = (req.query.t || '').toString();
+  const validSession = given.length >= 8 && given.length <= 64
+    ? await redis().get(`s:${given}`)
+    : null;
+
+  // Ticket valid + sesi valid untuk link yang sama -> teruskan ke gate tujuan.
+  if (validSession && validSession.id === link.id && givenTicket) {
+    const ticket = await redis().get(`t:${givenTicket}`);
+    if (ticket && ticket.id === link.id && ticket.gate >= 2 && ticket.gate <= 3) {
       return send(res, 200, {
         id: link.id,
         name: link.name,
         size: link.size,
         session: given,
-        steps: sess.steps,
+        steps: validSession.steps,
+        gate: ticket.gate,
       });
     }
   }
 
+  // Sesi valid tanpa ticket -> gate berikutnya mengikuti progres sesi.
+  if (validSession && validSession.id === link.id) {
+    return send(res, 200, {
+      id: link.id,
+      name: link.name,
+      size: link.size,
+      session: given,
+      steps: validSession.steps,
+      gate: Math.min(3, validSession.steps + 1),
+    });
+  }
+
+  // Tidak ada sesi/ticket valid -> kunjungan baru, kembali ke gate 1.
   const session = `${newId()}${newId()}`;
   await redis().set(`s:${session}`, { id: link.id, steps: 0 }, { ex: TTL_SESSION });
   await Promise.all([bumpFunnel(link.id, 'v'), bumpDay('v')]);
@@ -50,5 +73,6 @@ export default async function handler(req, res) {
     size: link.size,
     session,
     steps: 0,
+    gate: 1,
   });
 }

@@ -234,9 +234,26 @@ res = await call(resolveApi, { query: { id, s: 'garbage-session-123' } });
 assert.equal(res.statusCode, 200, 'sesi tak dikenal harus tetap 200');
 assert.notEqual(res.body.session, 'garbage-session-123', 'sesi tak dikenal harus dibuatkan sesi baru');
 assert.equal(res.body.steps, 0);
+assert.equal(res.body.gate, 1, 'sesi baru harus turun ke gate 1');
 
 res = await call(resolveApi, { query: { id: 'id-lain', s: other.body.session } });
 assert.equal(res.statusCode, 404, 'sesi milik link lain tidak boleh mengunci link yang tidak ada');
+
+// --- ticket URL acak (model gate-per-URL) -----------------------------------
+res = await call(trackApi, { method: 'POST', body: { session: other.body.session, step: 1 } });
+assert.equal(res.statusCode, 200);
+const ticket2 = res.body.ticket;
+assert.ok(/^[A-Za-z0-9_-]{8,64}$/.test(ticket2), 'gate 1 selesai harus menerbitkan ticket acak');
+
+res = await call(resolveApi, { query: { id, s: other.body.session, t: ticket2 } });
+assert.equal(res.statusCode, 200);
+assert.equal(res.body.gate, 2, 'ticket valid harus membuka gate 2');
+assert.equal(res.body.steps, 1, 'progres sesi harus ikut terbawa');
+
+res = await call(resolveApi, { query: { id, s: 'gar..bag', t: `${lib.newId()}${lib.newId()}` } });
+assert.equal(res.body.gate, 1, 'ticket tanpa sesi valid harus turun ke gate 1');
+
+assert.ok(!/^[A-Za-z0-9_-]{8,64}$/.test('xxx'), 'sanity: ticket harus string panjang');
 
 // --- status nonaktif --------------------------------------------------------
 res = await call(linkApi, { method: 'PATCH', query: { id }, body: { status: 'PAUSED' } });
