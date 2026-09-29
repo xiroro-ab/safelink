@@ -586,28 +586,26 @@
     }
 
     // Pembersih kotak kosong yang AMAN:
-// - Setiap slot dipantau (MutationObserver). Begitu ada elemen iklan nyata
-//   (iframe/ins/img/embed/teks) yang masuk kapan pun, slot ditandai 'terisi'
-//   selamanya dan TIDAK akan disembunyikan — termasuk iklan yang lambat/lazy.
-// - Hanya slot yang sejak awal tidak memuat apa-apa (no-fill) yang hilang.
+// - Setiap slot dipantau (MutationObserver). Adsterra menyuntik node apa pun ke
+//   dalam slot saat ada iklan — bahkan yang langsung collapse/auto-refresh.
+//   Begitu ada node non-script masuk KAPAN PUN, slot ditandai 'eksis' dan tidak
+//   akan pernah disembunyikan. Iklan lambat/lazy juga aman.
+// - Hanya slot yang sejak awal nol aktivitas (no-fill murni) yang hilang.
 // - Popunder (tab baru) di luar sistem slot dan tidak tersentuh di sini.
     function cleanupEmptyAds() {
-        const FILLED = new Set();
+        const ALIVE = new Set();
         const SLOTS = ['ad-slot-header', 'ad-slot-footer', 'ad-slot-middle-dynamic',
             'ad-slot-bottom-action', 'ad-slot-native', 'ad-slot-native-2',
             'ad-slot-sidebar-1', 'ad-slot-sidebar-2', 'ad-slot-sticky-bottom'];
-        const hasMediaOrText = (node) => {
+        const isRealNode = (node) => {
             const el = node.nodeType === 1 ? node : node.parentElement;
-            if (!el || el.tagName === 'SCRIPT') return false;
-            if (el.matches && el.matches('iframe, ins, img, embed, object, canvas, .adsbygoogle')) return true;
-            return Array.from(el.childNodes || []).some((c) =>
-                c.nodeType === 3 && (c.textContent || '').trim().length > 0);
+            return !!el && el.tagName !== 'SCRIPT';
         };
         const observer = new MutationObserver((mutations) => {
             for (const m of mutations) {
                 const slot = m.target.closest('[id^="ad-slot-"]');
                 if (!slot) continue;
-                for (const node of m.addedNodes) if (hasMediaOrText(node)) FILLED.add(slot.id);
+                if (m.addedNodes && Array.from(m.addedNodes).some(isRealNode)) ALIVE.add(slot.id);
             }
         });
         SLOTS.forEach((id) => { const el = $(id); if (el) observer.observe(el, { childList: true, subtree: true }); });
@@ -621,7 +619,6 @@
                 .some((n) => (n.textContent || '').trim().length > 0);
         };
 
-        // Beri waktu iklan memuat; yang sudah pernah terisi tidak akan di-hide.
         setTimeout(() => {
             observer.disconnect();
             const sections = {
@@ -634,18 +631,18 @@
                 'ad-slot-sidebar-2': 'ad-section-sidebar-2',
             };
             for (const [slotId, secId] of Object.entries(sections)) {
-                if (FILLED.has(slotId) || hasAdNow(slotId)) continue;
+                if (ALIVE.has(slotId) || hasAdNow(slotId)) continue;
                 $(secId).classList.add('hidden');
             }
-            if (!FILLED.has('ad-slot-bottom-action') && !hasAdNow('ad-slot-bottom-action')) {
+            if (!ALIVE.has('ad-slot-bottom-action') && !hasAdNow('ad-slot-bottom-action')) {
                 $('ad-slot-bottom-action').classList.add('hidden');
                 $('bottom-layout').classList.add('md:grid-cols-1');
                 $('bottom-layout').classList.remove('md:grid-cols-2');
             }
-            if (!FILLED.has('ad-slot-sticky-bottom') && !hasAdNow('ad-slot-sticky-bottom')) {
+            if (!ALIVE.has('ad-slot-sticky-bottom') && !hasAdNow('ad-slot-sticky-bottom')) {
                 $('sticky-ad-bar').classList.add('hidden');
             }
-        }, 15000);
+        }, 20000);
     }
 
     function urlFor(g) {
