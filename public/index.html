@@ -606,8 +606,12 @@
         $('bottom-layout').classList.toggle('md:grid-cols-1', !middle);
         $('bottom-layout').classList.toggle('md:grid-cols-2', !!middle);
 
-        if ((c.popunderGates || []).includes(gate) && c.bannerPopunder) {
-            injectScript('adsterra-popunder-container', c.bannerPopunder);
+        // Popunder: override per gate dulu (boleh beda jaringan tiap gate), kalau
+        // kosong pakai default global bila gate ini tercentang di admin.
+        const popunder = (g.popunder || '').trim()
+            || (((c.popunderGates || []).includes(gate)) ? (c.bannerPopunder || '') : '');
+        if (popunder) {
+            injectScript('adsterra-popunder-container', popunder);
         }
     }
 

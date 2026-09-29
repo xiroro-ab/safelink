@@ -4,7 +4,7 @@ const KEY = 'config:ads';
 
 const emptyGate = () => ({
   smartlink: '', header: '', middle: '', native: '',
-  konten: '', halfpage: '', mobile: '',
+  konten: '', halfpage: '', mobile: '', popunder: '',
 });
 
 const DEFAULTS = {
@@ -74,6 +74,7 @@ export default async function handler(req, res) {
         konten: String(g.konten ?? '').trim(),
         halfpage: String(g.halfpage ?? '').trim(),
         mobile: String(g.mobile ?? '').trim(),
+        popunder: String(g.popunder ?? '').trim(),
       };
     };
     const next = {
