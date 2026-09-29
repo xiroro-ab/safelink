@@ -2,7 +2,10 @@
 
 const KEY = 'config:ads';
 
-const emptyGate = () => ({ smartlink: '', header: '', middle: '', native: '' });
+const emptyGate = () => ({
+  smartlink: '', header: '', middle: '', native: '',
+  konten: '', halfpage: '', mobile: '',
+});
 
 const DEFAULTS = {
   smartlink: '',
@@ -11,6 +14,9 @@ const DEFAULTS = {
   bannerMiddle: '',
   bannerNative: '',
   bannerSticky: '',
+  bannerKonten: '',
+  bannerHalfpage: '',
+  bannerMobile: '',
   bannerPopunder: '',
   popunderGates: [1],
   timerSeconds: 10,
@@ -65,6 +71,9 @@ export default async function handler(req, res) {
         header: String(g.header ?? '').trim(),
         middle: String(g.middle ?? '').trim(),
         native: String(g.native ?? '').trim(),
+        konten: String(g.konten ?? '').trim(),
+        halfpage: String(g.halfpage ?? '').trim(),
+        mobile: String(g.mobile ?? '').trim(),
       };
     };
     const next = {
@@ -79,6 +88,9 @@ export default async function handler(req, res) {
       bannerMiddle: String(body.bannerMiddle ?? current.bannerMiddle).trim(),
       bannerNative: String(body.bannerNative ?? current.bannerNative).trim(),
       bannerSticky: String(body.bannerSticky ?? current.bannerSticky).trim(),
+      bannerKonten: String(body.bannerKonten ?? current.bannerKonten).trim(),
+      bannerHalfpage: String(body.bannerHalfpage ?? current.bannerHalfpage).trim(),
+      bannerMobile: String(body.bannerMobile ?? current.bannerMobile).trim(),
       bannerPopunder: String(body.bannerPopunder ?? current.bannerPopunder).trim(),
       // Popunder identik berulang cepat mudah dikenali anti-fraud: defaultnya
       // hanya gate 1, bukan semua gate.

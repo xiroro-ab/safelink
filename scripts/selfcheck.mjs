@@ -290,17 +290,27 @@ res = await call(adsApi, {
   body: {
     smartlinkGates: [1],
     popunderGates: [2, 2, 7],
-    gates: { 2: { smartlink: 'https://g2.example/x', header: '<g2>', middle: '<m2>', native: '<n2>' } },
+    bannerKonten: '<k468>',
+    bannerHalfpage: '<h160>',
+    bannerMobile: '<m320>',
+    gates: { 2: { smartlink: 'https://g2.example/x', header: '<g2>', middle: '<m2>', native: '<n2>', konten: '<k2>', halfpage: '<p2>', mobile: '<b2>' } },
   },
 });
 assert.equal(res.statusCode, 200);
 assert.deepEqual(res.body.smartlinkGates, [1], 'daftar gate harus dipoles menjadi [1]');
 assert.deepEqual(res.body.popunderGates, [2], 'nilai di luar 1-3 harus dibuang');
 assert.equal(res.body.gates[2].smartlink, 'https://g2.example/x', 'override gate 2 smartlink tersimpan');
+assert.equal(res.body.gates[2].konten, '<k2>', 'override gate 2 konten 468x60 tersimpan');
+assert.equal(res.body.gates[2].halfpage, '<p2>', 'override gate 2 half-page 160x600 tersimpan');
 assert.equal(res.body.gates[1].header, '', 'gate yang tidak dikirim tetap dipertahankan kosong');
+assert.equal(res.body.bannerKonten, '<k468>', 'default konten 468x60 tersimpan');
+assert.equal(res.body.bannerHalfpage, '<h160>', 'default half-page 160x600 tersimpan');
+assert.equal(res.body.bannerMobile, '<m320>', 'default mobile 320x50 tersimpan');
 
 res = await call(adsApi, { auth: null });
 assert.equal(res.body.gates[2].middle, '<m2>', 'override gate tampil untuk publik');
+assert.equal(res.body.gates[2].mobile, '<b2>', 'override gate mobile tersimpan');
+assert.equal(res.body.ecpm, undefined, 'eCPM tetap disembunyikan dari publik');
 
 res = await call(adsApi, { method: 'PUT', body: { smartlink: 'ftp://x' } });
 assert.equal(res.statusCode, 400, 'smartlink non-http harus ditolak');

@@ -545,21 +545,28 @@
         const header = g.header || c.bannerHeader || '';
         const middle = g.middle || c.bannerMiddle || '';
         const native = g.native || c.bannerNative || c.bannerMiddle || '';
+        const konten = g.konten || c.bannerKonten || middle;
+        const halfpage = g.halfpage || c.bannerHalfpage || middle;
+        const sticky = c.bannerSticky || c.bannerMobile || '';
 
         if (header) {
             injectScript('ad-slot-header', header);
             injectScript('ad-slot-footer', header);
         }
+        if (konten) {
+            injectScript('ad-slot-middle-dynamic', konten);
+        }
         if (middle) {
-            injectScript('ad-slot-middle-dynamic', middle);
             injectScript('ad-slot-bottom-action', middle);
             injectScript('ad-slot-sidebar-1', middle);
-            injectScript('ad-slot-sidebar-2', middle);
+        }
+        if (halfpage) {
+            injectScript('ad-slot-sidebar-2', halfpage);
         }
         if (native) {
             injectScript('ad-slot-native', native);
         }
-        if (c.bannerSticky) injectScript('ad-slot-sticky-bottom', c.bannerSticky);
+        if (sticky) injectScript('ad-slot-sticky-bottom', sticky);
         if ((c.popunderGates || []).includes(gate) && c.bannerPopunder) {
             injectScript('adsterra-popunder-container', c.bannerPopunder);
         }
