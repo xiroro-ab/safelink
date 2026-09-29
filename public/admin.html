@@ -643,9 +643,9 @@
                         <button type="button" onclick="toggleStatus('${esc(l.id)}')" class="px-2 py-0.5 rounded text-[10px] font-bold ${statusBadge(l.status)}">${l.status}</button>
                     </td>
                     <td class="py-3 text-right space-x-1 shrink-0">
-                        <button type="button" data-copy="${esc(link)}" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-emerald-400 rounded" title="Salin Safelink URL"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
-                        <a href="${esc(link)}" target="_blank" rel="noopener" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-blue-400 rounded inline-block" title="Uji Coba Link"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
-                        <button type="button" onclick="confirmDelete('${esc(l.id)}')" class="p-1.5 bg-zinc-800 hover:bg-zinc-700 text-red-400 rounded" title="Hapus Link"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                        <button type="button" data-copy="${esc(link)}" class="w-7 h-7 inline-flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 text-emerald-400 rounded" title="Salin Safelink URL"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+                        <a href="${esc(link)}" target="_blank" rel="noopener" class="w-7 h-7 inline-flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 text-blue-400 rounded" title="Uji Coba Link"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
+                        <button type="button" onclick="confirmDelete('${esc(l.id)}')" class="w-7 h-7 inline-flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 text-red-400 rounded" title="Hapus Link"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </td>
                 </tr>`;
             }).join('')

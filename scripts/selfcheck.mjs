@@ -215,6 +215,29 @@ assert.equal(res.body.series.length, 7, 'seri harian harus 7 titik');
 assert.ok(res.body.files[0].enc === undefined, 'statistik tidak boleh membocorkan ciphertext');
 assert.equal(res.body.files[0].name, 'Contoh File.zip');
 
+// --- resolve reuse sesi (model gate-per-URL) --------------------------------
+res = await call(resolveApi, { query: { id, s: session } });
+assert.equal(res.statusCode, 200, 'resolve dengan sesi hidup harus 200');
+assert.equal(res.body.session, session, 'sesi yang sama harus dipertahankan');
+assert.equal(res.body.steps, 3, 'progres harus terbaca dari sesi');
+assert.equal(res.body.enc, undefined, 'resolve ulang tetap tidak boleh membocorkan ciphertext');
+
+// Sesi asing (dari link yang sama tapi belum pernah ditambah langkah) tidak
+// boleh menambah kunjungan.
+const before = (await call(statsApi)).body.totals.views;
+res = await call(resolveApi, { query: { id, s: other.body.session } });
+assert.equal(res.statusCode, 200);
+const after = (await call(statsApi)).body.totals.views;
+assert.equal(before, after, 'resolve ulang dengan sesi yang sama tidak boleh menambah kunjungan');
+
+res = await call(resolveApi, { query: { id, s: 'garbage-session-123' } });
+assert.equal(res.statusCode, 200, 'sesi tak dikenal harus tetap 200');
+assert.notEqual(res.body.session, 'garbage-session-123', 'sesi tak dikenal harus dibuatkan sesi baru');
+assert.equal(res.body.steps, 0);
+
+res = await call(resolveApi, { query: { id: 'id-lain', s: other.body.session } });
+assert.equal(res.statusCode, 404, 'sesi milik link lain tidak boleh mengunci link yang tidak ada');
+
 // --- status nonaktif --------------------------------------------------------
 res = await call(linkApi, { method: 'PATCH', query: { id }, body: { status: 'PAUSED' } });
 assert.equal(res.statusCode, 200);

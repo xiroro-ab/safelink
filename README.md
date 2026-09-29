@@ -17,10 +17,14 @@ Tautan yang dibagikan berbentuk `https://domain-anda/?id=aBc12345`. ID itu acak,
 
 1. `GET /api/resolve?id=aBc12345` mengembalikan nama file, ukuran, dan `session`
    acak. **URL target tidak pernah dikirim ke browser.**
-2. Setiap klik langkah verifikasi mengirim `POST /api/track`. Server mencatat
-   langkahnya dan menolak laporan yang tidak berurutan, jadi tidak bisa dilompati.
-3. Setelah langkah 1, 2, dan 3 tercatat, tombol unduh mengarah ke `/api/go`,
-   yang melakukan redirect 302 ke URL target. Alamat aslinya tidak pernah tampil
+2. Pengunjung melewati **3 gate, masing-masing di URL sendiri**:
+   `/?id=X&s=<sesi>&g=1` → `g=2` → `g=3`. Tiap gate butuh satu klik verifikasi
+   (smartlink iklan terbuka), lalu hitung mundur.
+3. Setiap langkah mengirim `POST /api/track`. Server mencatat langkahnya dan
+   menolak laporan yang tidak berurutan, jadi tidak bisa dilompati. Sesi yang sama
+   dipakai lintas URL gate, dan berpindah URL tidak menghitung kunjungan kedua.
+4. Setelah langkah 3 tercatat, tombol unduh muncul yang mengarah ke `/api/go`,
+   melakukan redirect 302 ke URL target. Alamat aslinya tidak pernah tampil
    di address bar.
 
 URL target disimpan di Redis dalam bentuk terenkripsi AES-256-GCM (kunci dari
@@ -39,6 +43,18 @@ Prasyarat: akun Vercel dan satu Redis (Upstash).
 ```bash
 npm install
 ```
+
+## Titik balik (restore)
+
+Versi yang berjalan sebelum revamp gate disimpan sebagai tag
+`backup-pre-revamp` (commit `556cca9`). Untuk kembalikan seluruh kode ke versi itu:
+
+```bash
+git checkout backup-pre-revamp
+vercel deploy --prod --yes
+```
+
+Data (link, statistik) tidak terpengaruh — semuanya di Redis Upstash, di luar repo.
 
 1. Push repo ini ke GitHub, lalu import ke Vercel. Framework preset: **Other**.
    `vercel.json` sudah menangani build dan routing.
