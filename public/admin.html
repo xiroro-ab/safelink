@@ -364,30 +364,29 @@
 
                                 <div class="p-3 bg-zinc-900 border border-blue-500/30 rounded space-y-1.5 text-[11px] leading-relaxed">
                                     <div class="font-bold text-blue-400 uppercase">Panduan unit HilltopAds</div>
-                                    <div>Di dashboard HilltopAds → <span class="text-zinc-200">Inventory / Ad Formats → Get Code</span>. Lalu padankan:</div>
+                                    <div>Format yang tersedia di account Anda (di dashboard HilltopAds ada tombol <span class="text-zinc-200">Get Code</span> di tiap format):</div>
                                     <div class="grid grid-cols-2 gap-x-4">
-                                        <div><span class="text-zinc-500">Smartlink</span> → <b class="text-blue-300">Smartlink default</b></div>
                                         <div><span class="text-zinc-500">Popunder</span> → <b class="text-blue-300">Pop-Under</b></div>
-                                        <div><span class="text-zinc-500">Banner 300×250</span> → <b class="text-blue-300">Middle</b></div>
-                                        <div><span class="text-zinc-500">In-Page Push</span> → <b class="text-blue-300">Native</b></div>
-                                        <div><span class="text-zinc-500">Banner 300×100 (HP)</span> → <b class="text-blue-300">Konten 468×60</b></div>
-                                        <div><span class="text-zinc-500">Video Slider</span> → <b class="text-blue-300">Sticky</b></div>
-                                        <div><span class="text-zinc-500">Banner 728×90</span> → <b class="text-blue-300">Header</b></div>
-                                        <div><span class="text-zinc-500">Video VAST 3.0</span> → <b class="text-red-400">lewati (butuh video player)</b></div>
+                                        <div><span class="text-zinc-500">MultiTag: Banner 300×100</span> → <b class="text-blue-300">Konten 468×60</b> <span class="text-zinc-600">(hanya HP)</span></div>
+                                        <div><span class="text-zinc-500">MultiTag: Banner 300×250</span> → <b class="text-blue-300">Middle</b> <span class="text-zinc-600">(desktop + HP)</span></div>
+                                        <div><span class="text-zinc-500">MultiTag: In-Page Push</span> → <b class="text-blue-300">Native</b></div>
+                                        <div><span class="text-zinc-500">MultiTag: Video Slider</span> → <b class="text-blue-300">Sticky</b></div>
+                                        <div><span class="text-zinc-500">Video: VAST 3.0</span> → <b class="text-red-400">lewati (butuh video player)</b></div>
                                     </div>
+                                    <div class="text-zinc-500">HilltopAds tidak punya Smartlink di akun Anda — kolom Smartlink diisi dari cairan lain (mis. Adsterra) atau dikosongkan.</div>
                                 </div>
 
                                 <div class="p-3 bg-emerald-900/20 border border-emerald-500/30 rounded text-[11px] leading-relaxed">
                                     <div class="font-bold text-emerald-400 uppercase">Cara mencampur Adsterra + HilltopAds</div>
                                     <div>1. Tiap kolom hanya diisi <b class="text-emerald-300">SATU jaringan</b> — pilih per kolom dari mana Anda ingin. Contoh: Middle &amp; Popunder dari HilltopAds, Header &amp; Native dari Adsterra.</div>
-                                    <div>2. <b class="text-emerald-300">Popunder: satu per halaman</b> — boleh jaringan beda per gate (kolom "Popunder kustom" di kartu GATE 1 / 3). Dua popunder di halaman yang SAMA justru saling memblokir. <b class="text-emerald-300">Sticky tetap satu</b> (dua bar melayang menabrak).</div>
+                                    <div>2. <b class="text-emerald-300">Popunder &amp; Sticky: satu per halaman</b> — boleh jaringan beda per gate (kolom "Popunder kustom"/"Sticky kustom" di kartu GATE). Dua unit yang sama pada halaman yang SAMA saling memblokir/menabrak.</div>
                                     <div>3. Untuk rotasi per gate (mis. gate 2 pakai HilltopAds, gate lain Adsterra), isi <b class="text-emerald-300">kartu GATE 1/2/3</b> di bawah — kolom yang dikosongkan akan memakai default global.</div>
                                 </div>
 
                                 <div>
                                     <label class="block text-zinc-300 font-bold mb-1">Smartlink default (URL)</label>
                                     <input type="url" id="cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
-                                    <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">Smartlink</span> Adsterra atau HilltopAds — <b>bukan kode skrip, ini URL</b> (contoh: <span class="text-zinc-300">https://www.highratedcpmnetwork.com/smartlink-…</span>). Dibuka otomatis di tab baru saat pengunjung klik verifikasi.</p>
+                                    <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">Smartlink Adsterra</span> — <b>bukan kode skrip, ini URL</b> (contoh: <span class="text-zinc-300">https://www.highratedcpmnetwork.com/smartlink-…</span>). Dibuka otomatis di tab baru saat pengunjung klik verifikasi. (HilltopAds di akun Anda tidak punya Smartlink.)</p>
                                     <div class="flex items-center gap-3 mt-1 text-zinc-400">
                                         <span class="text-[10px] uppercase">Buka di gate:</span>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-1" class="accent-emerald-500">1</label>
@@ -470,7 +469,7 @@
                                         <div><label class="block text-zinc-500 mb-0.5">Native</label>
                                             <textarea id="cfg-g1-native" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
                                         <div><label class="block text-zinc-500 mb-0.5">Mobile <span class="text-zinc-600">(320×50)</span></label>
-                                            <textarea id="cfg-g1-mobile" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Popunder kustom <span class="text-zinc-600">(boleh beda jaringan per gate)</span></label><textarea id="cfg-g1-popunder" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                            <textarea id="cfg-g1-mobile" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Popunder kustom <span class="text-zinc-600">(boleh beda jaringan per gate)</span></label><textarea id="cfg-g1-popunder" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Sticky kustom <span class="text-zinc-600">(bar melayang, boleh beda jaringan per gate)</span></label><textarea id="cfg-g1-sticky" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
                                     </div>
                                 </details>
                                 <details class="p-4 bg-zinc-950 border border-zinc-800 rounded">
@@ -489,7 +488,7 @@
                                         <div><label class="block text-zinc-500 mb-0.5">Native</label>
                                             <textarea id="cfg-g2-native" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
                                         <div><label class="block text-zinc-500 mb-0.5">Mobile <span class="text-zinc-600">(320×50)</span></label>
-                                            <textarea id="cfg-g2-mobile" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Popunder kustom <span class="text-zinc-600">(boleh beda jaringan per gate)</span></label><textarea id="cfg-g2-popunder" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                            <textarea id="cfg-g2-mobile" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Popunder kustom <span class="text-zinc-600">(boleh beda jaringan per gate)</span></label><textarea id="cfg-g2-popunder" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Sticky kustom <span class="text-zinc-600">(bar melayang, boleh beda jaringan per gate)</span></label><textarea id="cfg-g2-sticky" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
                                     </div>
                                 </details>
                                 <details class="p-4 bg-zinc-950 border border-zinc-800 rounded">
@@ -508,7 +507,7 @@
                                         <div><label class="block text-zinc-500 mb-0.5">Native</label>
                                             <textarea id="cfg-g3-native" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
                                         <div><label class="block text-zinc-500 mb-0.5">Mobile <span class="text-zinc-600">(320×50)</span></label>
-                                            <textarea id="cfg-g3-mobile" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Popunder kustom <span class="text-zinc-600">(boleh beda jaringan per gate)</span></label><textarea id="cfg-g3-popunder" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                            <textarea id="cfg-g3-mobile" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Popunder kustom <span class="text-zinc-600">(boleh beda jaringan per gate)</span></label><textarea id="cfg-g3-popunder" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div><div><label class="block text-zinc-500 mb-0.5">Sticky kustom <span class="text-zinc-600">(bar melayang, boleh beda jaringan per gate)</span></label><textarea id="cfg-g3-sticky" rows="1" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
                                     </div>
                                 </details>
                             </div>
@@ -880,6 +879,7 @@
             $(`cfg-g${g}-halfpage`).value = x.halfpage || '';
             $(`cfg-g${g}-mobile`).value = x.mobile || '';
             $(`cfg-g${g}-popunder`).value = x.popunder || '';
+            $(`cfg-g${g}-sticky`).value = x.sticky || '';
         });
     }
 
@@ -893,6 +893,7 @@
             halfpage: $(`cfg-g${g}-halfpage`).value.trim(),
             mobile: $(`cfg-g${g}-mobile`).value.trim(),
             popunder: $(`cfg-g${g}-popunder`).value.trim(),
+            sticky: $(`cfg-g${g}-sticky`).value.trim(),
         });
         return {
             smartlink: $('cfg-smartlink').value.trim(),

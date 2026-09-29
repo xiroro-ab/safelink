@@ -588,7 +588,7 @@
         const native = g.native || c.bannerNative || c.bannerMiddle || '';
         const konten = g.konten || c.bannerKonten || middle;
         const halfpage = g.halfpage || c.bannerHalfpage || middle;
-        const sticky = c.bannerSticky || c.bannerMobile || '';
+        const sticky = (g.sticky || c.bannerSticky || c.bannerMobile || '').trim();
 
         fillSlot('ad-section-header', 'ad-slot-header', header);
         fillSlot('ad-section-footer', 'ad-slot-footer', header);

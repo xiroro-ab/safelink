@@ -326,9 +326,10 @@ assert.equal(res.body.gates[2].middle, '<m2>', 'override gate tampil untuk publi
 assert.equal(res.body.gates[2].mobile, '<b2>', 'override gate mobile tersimpan');
 assert.equal(res.body.ecpm, undefined, 'eCPM tetap disembunyikan dari publik');
 
-res = await call(adsApi, { method: 'PUT', body: { gates: { 3: { popunder: '<pu3>' } } } });
+res = await call(adsApi, { method: 'PUT', body: { gates: { 3: { popunder: '<pu3>', sticky: '<st3>' } } } });
 assert.equal(res.statusCode, 200);
 assert.equal(res.body.gates[3].popunder, '<pu3>', 'popunder kustom per gate tersimpan');
+assert.equal(res.body.gates[3].sticky, '<st3>', 'sticky kustom per gate tersimpan');
 assert.equal(res.body.gates[1].popunder, '', 'gate lain popunder kustom tetap kosong');
 
 res = await call(adsApi, { method: 'PUT', body: { smartlink: 'ftp://x' } });
