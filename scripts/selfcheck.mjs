@@ -282,6 +282,25 @@ assert.equal(res.body.bannerMiddle, '', 'field yang tidak dikirim harus dipertah
 res = await call(adsApi, { auth: null });
 assert.equal(res.body.smartlink, 'https://smart.example/sl1', 'publik harus melihat smartlink');
 assert.equal(res.body.ecpm, undefined, 'eCPM tetap disembunyikan dari publik');
+assert.deepEqual(res.body.smartlinkGates, [1, 2, 3], 'smartlink default harus terpakai di semua gate');
+assert.deepEqual(res.body.popunderGates, [1], 'popunder default hanya gate 1');
+
+res = await call(adsApi, {
+  method: 'PUT',
+  body: {
+    smartlinkGates: [1],
+    popunderGates: [2, 2, 7],
+    gates: { 2: { smartlink: 'https://g2.example/x', header: '<g2>', middle: '<m2>', native: '<n2>' } },
+  },
+});
+assert.equal(res.statusCode, 200);
+assert.deepEqual(res.body.smartlinkGates, [1], 'daftar gate harus dipoles menjadi [1]');
+assert.deepEqual(res.body.popunderGates, [2], 'nilai di luar 1-3 harus dibuang');
+assert.equal(res.body.gates[2].smartlink, 'https://g2.example/x', 'override gate 2 smartlink tersimpan');
+assert.equal(res.body.gates[1].header, '', 'gate yang tidak dikirim tetap dipertahankan kosong');
+
+res = await call(adsApi, { auth: null });
+assert.equal(res.body.gates[2].middle, '<m2>', 'override gate tampil untuk publik');
 
 res = await call(adsApi, { method: 'PUT', body: { smartlink: 'ftp://x' } });
 assert.equal(res.statusCode, 400, 'smartlink non-http harus ditolak');

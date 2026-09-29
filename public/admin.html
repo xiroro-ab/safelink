@@ -337,25 +337,99 @@
                             </p>
                         </div>
 
-                        <form onsubmit="saveAdConfig(event)" class="space-y-4 font-mono text-xs">
-                            <div>
-                                <label class="block text-zinc-300 font-bold mb-1">1. Smartlink URL Adsterra (dibuka tiap klik verifikasi)</label>
-                                <input type="url" id="cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-zinc-300 font-bold mb-1">2. Banner 728x90 (header &amp; footer)</label>
-                                    <textarea id="cfg-banner-header" rows="4" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                        <form onsubmit="saveAdConfig(event)" class="space-y-5 font-mono text-xs">
+
+                            <div class="p-4 bg-zinc-950 border border-zinc-800 rounded space-y-4">
+                                <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                                    <h4 class="font-bold text-zinc-200 flex items-center gap-2"><i data-lucide="sliders" class="w-4 h-4 text-amber-400"></i> DEFAULT GLOBAL</h4>
+                                    <span class="text-[10px] text-zinc-500">dipakai semua gate, bisa ditimpa per gate</span>
                                 </div>
+
                                 <div>
-                                    <label class="block text-zinc-300 font-bold mb-1">3. Banner 300x250 (action zone, sidebar, konten)</label>
-                                    <textarea id="cfg-banner-middle" rows="4" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                    <label class="block text-zinc-300 font-bold mb-1">Smartlink default (URL)</label>
+                                    <input type="url" id="cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
+                                    <div class="flex items-center gap-3 mt-2 text-zinc-400">
+                                        <span class="text-[10px] uppercase">Buka di gate:</span>
+                                        <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-1" class="accent-emerald-500">1</label>
+                                        <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-2" class="accent-emerald-500">2</label>
+                                        <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-3" class="accent-emerald-500">3</label>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-zinc-300 font-bold mb-1">Banner 728x90 (header &amp; footer)</label>
+                                        <textarea id="cfg-banner-header" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-zinc-300 font-bold mb-1">Banner 300x250 (tombol bawah, sidebar, konten)</label>
+                                        <textarea id="cfg-banner-middle" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-zinc-300 font-bold mb-1">Native (feed rekomendasi)</label>
+                                        <textarea id="cfg-banner-native" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="block text-zinc-300 font-bold mb-1">Sticky bar bawah</label>
+                                        <textarea id="cfg-banner-sticky" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-zinc-300 font-bold mb-1">Pop-Under</label>
+                                    <textarea id="cfg-popunder" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                    <div class="flex items-center gap-3 mt-2 text-zinc-400">
+                                        <span class="text-[10px] uppercase">Muncul di gate:</span>
+                                        <label class="flex items-center gap-1"><input type="checkbox" id="cfg-pu-gates-1" class="accent-emerald-500">1</label>
+                                        <label class="flex items-center gap-1"><input type="checkbox" id="cfg-pu-gates-2" class="accent-emerald-500">2</label>
+                                        <label class="flex items-center gap-1"><input type="checkbox" id="cfg-pu-gates-3" class="accent-emerald-500">3</label>
+                                        <span class="text-[10px] text-zinc-600">Disarankan 1 saja — anti-fraud membedakan popup berulang.</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-zinc-300 font-bold mb-1">4. Script Pop-Under Adsterra</label>
-                                <textarea id="cfg-popunder" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-950 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <details class="p-4 bg-zinc-950 border border-zinc-800 rounded">
+                                    <summary class="cursor-pointer font-bold text-amber-400">GATE 1 <span class="text-zinc-500 font-mono">(override)</span></summary>
+                                    <div class="space-y-3 mt-3">
+                                        <div><label class="block text-zinc-400 mb-1">Smartlink kustom (kosong = pakai default)</label>
+                                            <input type="url" id="cfg-g1-sl" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></div>
+                                        <div><label class="block text-zinc-400 mb-1">Header</label>
+                                            <textarea id="cfg-g1-header" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                        <div><label class="block text-zinc-400 mb-1">Middle / tombol bawah</label>
+                                            <textarea id="cfg-g1-middle" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                        <div><label class="block text-zinc-400 mb-1">Native</label>
+                                            <textarea id="cfg-g1-native" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                    </div>
+                                </details>
+                                <details class="p-4 bg-zinc-950 border border-zinc-800 rounded">
+                                    <summary class="cursor-pointer font-bold text-blue-400">GATE 2 <span class="text-zinc-500 font-mono">(override)</span></summary>
+                                    <div class="space-y-3 mt-3">
+                                        <div><label class="block text-zinc-400 mb-1">Smartlink kustom (kosong = pakai default)</label>
+                                            <input type="url" id="cfg-g2-sl" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></div>
+                                        <div><label class="block text-zinc-400 mb-1">Header</label>
+                                            <textarea id="cfg-g2-header" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                        <div><label class="block text-zinc-400 mb-1">Middle / tombol bawah</label>
+                                            <textarea id="cfg-g2-middle" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                        <div><label class="block text-zinc-400 mb-1">Native</label>
+                                            <textarea id="cfg-g2-native" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                    </div>
+                                </details>
+                                <details class="p-4 bg-zinc-950 border border-zinc-800 rounded">
+                                    <summary class="cursor-pointer font-bold text-emerald-400">GATE 3 <span class="text-zinc-500 font-mono">(override)</span></summary>
+                                    <div class="space-y-3 mt-3">
+                                        <div><label class="block text-zinc-400 mb-1">Smartlink kustom (kosong = pakai default)</label>
+                                            <input type="url" id="cfg-g3-sl" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></div>
+                                        <div><label class="block text-zinc-400 mb-1">Header</label>
+                                            <textarea id="cfg-g3-header" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                        <div><label class="block text-zinc-400 mb-1">Middle / tombol bawah</label>
+                                            <textarea id="cfg-g3-middle" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                        <div><label class="block text-zinc-400 mb-1">Native</label>
+                                            <textarea id="cfg-g3-native" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea></div>
+                                    </div>
+                                </details>
                             </div>
+
                             <div class="pt-3 border-t border-zinc-800 flex justify-end">
                                 <button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded flex items-center gap-2 transition">
                                     <i data-lucide="save" class="w-4 h-4"></i><span>Simpan Konfigurasi Iklan</span>
@@ -656,27 +730,58 @@
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+    function setGates(id, list) {
+        const seen = new Set((list || []).map(Number));
+        [1, 2, 3].forEach((g) => { const el = $(`${id}-${g}`); if (el) el.checked = seen.has(g); });
+    }
+    const getGates = (id) => [1, 2, 3].filter((g) => { const el = $(`${id}-${g}`); return el && el.checked; });
+
     function renderConfigForm() {
         const c = app.config;
+        const gates = c.gates || {};
         $('cfg-smartlink').value = c.smartlink || '';
+        setGates('cfg-sl-gates', Array.isArray(c.smartlinkGates) ? c.smartlinkGates : (c.smartlink ? [1, 2, 3] : []));
         $('cfg-banner-header').value = c.bannerHeader || '';
         $('cfg-banner-middle').value = c.bannerMiddle || '';
+        $('cfg-banner-native').value = c.bannerNative || '';
+        $('cfg-banner-sticky').value = c.bannerSticky || '';
         $('cfg-popunder').value = c.bannerPopunder || '';
+        setGates('cfg-pu-gates', Array.isArray(c.popunderGates) ? c.popunderGates : [1]);
         $('cfg-timer').value = c.timerSeconds ?? 10;
         $('cfg-ecpm').value = c.ecpm ?? 3.7;
         $('cfg-gateway').value = c.gatewayUrl || '';
+        [1, 2, 3].forEach((g) => {
+            const x = gates[g] || {};
+            $(`cfg-g${g}-sl`).value = x.smartlink || '';
+            $(`cfg-g${g}-header`).value = x.header || '';
+            $(`cfg-g${g}-middle`).value = x.middle || '';
+            $(`cfg-g${g}-native`).value = x.native || '';
+        });
     }
 
-    const configPayload = (overrides = {}) => ({
-        smartlink: $('cfg-smartlink').value.trim(),
-        bannerHeader: $('cfg-banner-header').value.trim(),
-        bannerMiddle: $('cfg-banner-middle').value.trim(),
-        bannerPopunder: $('cfg-popunder').value.trim(),
-        timerSeconds: Number($('cfg-timer').value),
-        ecpm: Number($('cfg-ecpm').value),
-        gatewayUrl: $('cfg-gateway').value.trim(),
-        ...overrides,
-    });
+    const configPayload = (overrides = {}) => {
+        const gateOf = (g) => ({
+            smartlink: $(`cfg-g${g}-sl`).value.trim(),
+            header: $(`cfg-g${g}-header`).value.trim(),
+            middle: $(`cfg-g${g}-middle`).value.trim(),
+            native: $(`cfg-g${g}-native`).value.trim(),
+        });
+        return {
+            smartlink: $('cfg-smartlink').value.trim(),
+            smartlinkGates: getGates('cfg-sl-gates'),
+            bannerHeader: $('cfg-banner-header').value.trim(),
+            bannerMiddle: $('cfg-banner-middle').value.trim(),
+            bannerNative: $('cfg-banner-native').value.trim(),
+            bannerSticky: $('cfg-banner-sticky').value.trim(),
+            bannerPopunder: $('cfg-popunder').value.trim(),
+            popunderGates: getGates('cfg-pu-gates'),
+            timerSeconds: Number($('cfg-timer').value),
+            ecpm: Number($('cfg-ecpm').value),
+            gatewayUrl: $('cfg-gateway').value.trim(),
+            gates: { 1: gateOf(1), 2: gateOf(2), 3: gateOf(3) },
+            ...overrides,
+        };
+    };
 
     async function saveAdConfig(event) {
         event.preventDefault();

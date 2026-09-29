@@ -398,6 +398,7 @@
         smartlink: '',
         running: false,
         nextTicket: '',
+        adConfig: null,
     };
 
     const PALETTE = [
@@ -529,20 +530,39 @@
         });
     }
 
-    function applyAds(ads) {
-        state.smartlink = ads.smartlink || '';
-        state.timerSeconds = Math.min(60, Math.max(3, Number(ads.timerSeconds) || 10));
-        if (ads.bannerHeader) {
-            injectScript('ad-slot-header', ads.bannerHeader);
-            injectScript('ad-slot-footer', ads.bannerHeader);
+    function applyAds(gate) {
+        const c = state.adConfig;
+        if (!c) return;
+        const g = (c.gates || {})[String(gate)] || {};
+
+        state.timerSeconds = Math.min(60, Math.max(3, Number(c.timerSeconds) || 10));
+
+        // Smartlink: override per gate dulu, kalau kosong pakai default global
+        // hanya bila gate ini tercentang di pengaturan admin.
+        state.smartlink = (g.smartlink || '').trim()
+            || (((c.smartlinkGates || []).includes(gate)) ? (c.smartlink || '') : '');
+
+        const header = g.header || c.bannerHeader || '';
+        const middle = g.middle || c.bannerMiddle || '';
+        const native = g.native || c.bannerNative || c.bannerMiddle || '';
+
+        if (header) {
+            injectScript('ad-slot-header', header);
+            injectScript('ad-slot-footer', header);
         }
-        if (ads.bannerMiddle) {
-            injectScript('ad-slot-middle-dynamic', ads.bannerMiddle);
-            injectScript('ad-slot-bottom-action', ads.bannerMiddle);
-            injectScript('ad-slot-sidebar-1', ads.bannerMiddle);
-            injectScript('ad-slot-sidebar-2', ads.bannerMiddle);
+        if (middle) {
+            injectScript('ad-slot-middle-dynamic', middle);
+            injectScript('ad-slot-bottom-action', middle);
+            injectScript('ad-slot-sidebar-1', middle);
+            injectScript('ad-slot-sidebar-2', middle);
         }
-        if (ads.bannerPopunder) injectScript('adsterra-popunder-container', ads.bannerPopunder);
+        if (native) {
+            injectScript('ad-slot-native', native);
+        }
+        if (c.bannerSticky) injectScript('ad-slot-sticky-bottom', c.bannerSticky);
+        if ((c.popunderGates || []).includes(gate) && c.bannerPopunder) {
+            injectScript('adsterra-popunder-container', c.bannerPopunder);
+        }
     }
 
     function urlFor(g) {
@@ -697,7 +717,7 @@
         }
 
         const [adsResult, linkResult] = await Promise.allSettled([
-            fetch('/api/ads').then((r) => r.json()).then(applyAds).catch(() => {}),
+            fetch('/api/ads').then((r) => r.json()).catch(() => null),
             fetch(`/api/resolve?id=${encodeURIComponent(state.id)}&s=${encodeURIComponent(state.session)}${state.ticket ? `&t=${encodeURIComponent(state.ticket)}` : ''}`),
         ]);
 
@@ -726,10 +746,13 @@
             return;
         }
 
-        if (adsResult.status === 'rejected') {
+        if (adsResult.status === 'rejected' || !adsResult.value) {
             showToast('Unit iklan gagal dimuat, verifikasi tetap bisa berjalan.', 'info');
+        } else {
+            state.adConfig = adsResult.value;
         }
 
+        applyAds(state.gate);
         renderGate(state.gate);
     });
 </script>
