@@ -585,34 +585,67 @@
         }
     }
 
-    // Adsterra kadang tidak menemukan iklan untuk slot tertentu (no-fill),
-    // atau membuat wadah kosong (contoh: <div id="container-..."> tanpa iframe).
-    // Slot yang dalam beberapa detik tidak berisi iklan sungguhan disembunyikan,
-    // supaya tidak ada kotak kosong menggantung.
+    // Pembersih kotak kosong yang AMAN:
+// - Setiap slot dipantau (MutationObserver). Begitu ada elemen iklan nyata
+//   (iframe/ins/img/embed/teks) yang masuk kapan pun, slot ditandai 'terisi'
+//   selamanya dan TIDAK akan disembunyikan — termasuk iklan yang lambat/lazy.
+// - Hanya slot yang sejak awal tidak memuat apa-apa (no-fill) yang hilang.
+// - Popunder (tab baru) di luar sistem slot dan tidak tersentuh di sini.
     function cleanupEmptyAds() {
+        const FILLED = new Set();
+        const SLOTS = ['ad-slot-header', 'ad-slot-footer', 'ad-slot-middle-dynamic',
+            'ad-slot-bottom-action', 'ad-slot-native', 'ad-slot-native-2',
+            'ad-slot-sidebar-1', 'ad-slot-sidebar-2', 'ad-slot-sticky-bottom'];
+        const hasMediaOrText = (node) => {
+            const el = node.nodeType === 1 ? node : node.parentElement;
+            if (!el || el.tagName === 'SCRIPT') return false;
+            if (el.matches && el.matches('iframe, ins, img, embed, object, canvas, .adsbygoogle')) return true;
+            return Array.from(el.childNodes || []).some((c) =>
+                c.nodeType === 3 && (c.textContent || '').trim().length > 0);
+        };
+        const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+                const slot = m.target.closest('[id^="ad-slot-"]');
+                if (!slot) continue;
+                for (const node of m.addedNodes) if (hasMediaOrText(node)) FILLED.add(slot.id);
+            }
+        });
+        SLOTS.forEach((id) => { const el = $(id); if (el) observer.observe(el, { childList: true, subtree: true }); });
+
+        const hasAdNow = (id) => {
+            const el = $(id);
+            if (!el) return false;
+            if (el.querySelector('iframe, ins, img, embed, object, canvas, .adsbygoogle')) return true;
+            return Array.from(el.querySelectorAll('*'))
+                .filter((n) => n.tagName !== 'SCRIPT' && n.tagName !== 'DIV')
+                .some((n) => (n.textContent || '').trim().length > 0);
+        };
+
+        // Beri waktu iklan memuat; yang sudah pernah terisi tidak akan di-hide.
         setTimeout(() => {
-            const hasAd = (id) => {
-                const el = $(id);
-                if (!el) return false;
-                if (el.querySelector('iframe, ins, img, embed, object, canvas, .adsbygoogle')) return true;
-                // Elemen pembungkus saja (div container) tanpa teks berarti masih kosong.
-                const nodes = Array.from(el.querySelectorAll('*'))
-                    .filter((n) => n.tagName !== 'SCRIPT' && n.tagName !== 'DIV');
-                return nodes.some((n) => (n.textContent || '').trim().length > 0);
+            observer.disconnect();
+            const sections = {
+                'ad-slot-header': 'ad-section-header',
+                'ad-slot-footer': 'ad-section-footer',
+                'ad-slot-middle-dynamic': 'ad-section-mid',
+                'ad-slot-native': 'ad-section-native',
+                'ad-slot-native-2': 'ad-section-native-2',
+                'ad-slot-sidebar-1': 'ad-section-sidebar-1',
+                'ad-slot-sidebar-2': 'ad-section-sidebar-2',
             };
-            const sections = ['ad-section-header', 'ad-section-footer', 'ad-section-mid',
-                'ad-section-native', 'ad-section-native-2', 'ad-section-sidebar-1', 'ad-section-sidebar-2'];
-            sections.forEach((sid) => {
-                const slot = document.querySelector(`#${sid} [id^="ad-slot-"]`);
-                if (slot && !hasAd(slot.id)) $(sid).classList.add('hidden');
-            });
-            if (!hasAd('ad-slot-bottom-action')) {
+            for (const [slotId, secId] of Object.entries(sections)) {
+                if (FILLED.has(slotId) || hasAdNow(slotId)) continue;
+                $(secId).classList.add('hidden');
+            }
+            if (!FILLED.has('ad-slot-bottom-action') && !hasAdNow('ad-slot-bottom-action')) {
                 $('ad-slot-bottom-action').classList.add('hidden');
                 $('bottom-layout').classList.add('md:grid-cols-1');
                 $('bottom-layout').classList.remove('md:grid-cols-2');
             }
-            if (!hasAd('ad-slot-sticky-bottom')) $('sticky-ad-bar').classList.add('hidden');
-        }, 8000);
+            if (!FILLED.has('ad-slot-sticky-bottom') && !hasAdNow('ad-slot-sticky-bottom')) {
+                $('sticky-ad-bar').classList.add('hidden');
+            }
+        }, 15000);
     }
 
     function urlFor(g) {
