@@ -374,9 +374,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>&copy; <span id="footer-year"></span> GATEWAY_SECURE. ALL RIGHTS RESERVED.</div>
             <div class="flex gap-4">
-                <a href="#" class="hover:text-zinc-300">PRIVACY</a>
-                <a href="#" class="hover:text-zinc-300">TERMS</a>
-                <a href="#" class="hover:text-zinc-300">DMCA</a>
+                <a href="/privacy" class="hover:text-zinc-300">PRIVACY</a>
+                <a href="/terms" class="hover:text-zinc-300">TERMS</a>
+                <a href="/dmca" class="hover:text-zinc-300">DMCA</a>
             </div>
         </div>
     </footer>
@@ -434,6 +434,17 @@
                 <p class="text-zinc-300 leading-relaxed">Mekanisme verifikasi bertingkat (<em>multi-step verification</em>) dirancang bukan hanya untuk validasi enkripsi, namun juga sebagai metode mitigasi serangan <em>Distributed Denial of Service (DDoS)</em> serta pemindaian bot otomatis (<em>automated link scrapers</em>). Dengan membagi proses dekripsi menjadi 3 fase interaktif, beban lalu lintas server dapat didistribusikan secara efisien sambil memastikan keterlibatan manusia secara valid melalui verifikasi <em>token handshaking</em>.</p>
                 <h2 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-wider mt-6 mb-2">3. Arsitektur Pertukaran Kunci Ephemeral TLS 1.3</h2>
                 <p class="text-zinc-300 leading-relaxed">Sistem kami memanfaatkan protokol enkripsi TLS 1.3 dengan algoritma pertukaran kunci Ephemeral Diffie-Hellman (ECDHE). Pendekatan ini menjamin kriteria <em>Perfect Forward Secrecy (PFS)</em>, di mana setiap sesi verifikasi memiliki kunci simetris unik yang tidak dapat di-decrypt ulang meskipun kunci utama server berhasil diekspos di masa depan.</p>
+                <h2 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-wider mt-6 mb-2">4. Pemantauan Integritas Sesuai Sidik Jari Perangkat</h2>
+                <p class="text-zinc-300 leading-relaxed">Selain pemeriksaan hash statis, gateway melakukan inferensi ringan terhadap karakteristik sesi pengunjung — kombinasi <em>user-agent</em>, resolusi layar, waktu buka halaman, dan pola interaksi — untuk memastikan bahwa proses verifikasi dijalankan oleh browser nyata dengan keterlibatan manusia. Pendekatan ini tidak menggunakan identitas pribadi dan hanya berfungsi sebagai mekanisme penurun risiko terhadap operasi otomatis yang mencoba mengonsumsi tautan dalam skala besar.</p>
+                <p class="text-zinc-300 leading-relaxed mt-2">Bila karakteristik sesi tidak konsisten dengan perilaku manusia, gateway dapat menahan proses verifikasi sementara atau mengarahkan pengunjung untuk memuat ulang halaman. Langkah ini melindungi ketersediaan layanan bagi pengguna asli sekaligus mencegah terjadinya penyalahgunaan kuota CDN oleh perangkat lunak otomatis.</p>
+                <h2 class="text-xs font-bold font-mono text-amber-400 uppercase tracking-wider mt-6 mb-2">5. Penyimpanan Token Non-Persisten dan Kewajibannya</h2>
+                <p class="text-zinc-300 leading-relaxed">Token verifikasi yang diterbitkan pada tahap ini bersifat <em>non-persisten</em>: tidak ditulis ke penyimpanan permanen perangkat Anda, kedaluwarsa dalam hitungan menit, dan dihapus oleh server sesaat setelah proses tahap berkaitan selesai. Desain ini mengurangi jejak data sekaligus memastikan bahwa setiap rangkaian verifikasi bersifat segar dan tidak dapat diulang dengan menyalin tautan lama.</p>
+                <div class="my-4 p-4 bg-zinc-950 border border-zinc-800 rounded font-mono text-xs space-y-1.5">
+                    <div class="text-zinc-500">// Catatan Arsitektur Sesi Tahap 1</div>
+                    <div class="text-emerald-400">&gt; TOKEN_LIFETIME: 3600s • SINGLE_USE: TRUE</div>
+                    <div class="text-zinc-300">&gt; STORAGE_SCOPE: SERVER_SIDE_ONLY</div>
+                    <div class="text-zinc-300">&gt; ROTATION_POLICY: REGENERATED_PER_STEP</div>
+                </div>
                 <p class="mt-4 pt-3 border-t border-zinc-800 text-zinc-400 italic">Petunjuk: Klik tombol verifikasi di atas untuk mengaktifkan pemindaian. Hasilnya muncul di area bawah halaman.</p>`
         },
         2: {
@@ -454,6 +465,13 @@
                 <p class="text-zinc-300 leading-relaxed">Sistem kami memantau setiap permintaan unduhan melalui firewall aplikasi web (WAF) berbasis kecerdasan heuristik. Setiap alamat IP dibatasi (<em>rate-limited</em>) untuk mencegah banjir unduhan bersamaan yang dapat menurunkan kinerja node untuk pengguna lain. Verifikasi tahap kedua ini memvalidasi keaslian header HTTP dan sidik jari TLS (<em>TLS Fingerprinting</em>) dari perangkat Anda.</p>
                 <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">3. Manajemen Cache CDN Edge &amp; Revalidation Protocol</h2>
                 <p class="text-zinc-300 leading-relaxed">Server Edge kami secara otomatis menyegarkan header <em>Cache-Control: private, no-transform</em> pada setiap payload yang diunduh. Hal ini mencegah proxy perantara menyimpan salinan usang atau merusak struktur kompresi berkas saat proses transit antar wilayah geografis.</p>
+                <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">4. Otorisasi Berlapis pada Lapisan Aplikasi</h2>
+                <p class="text-zinc-300 leading-relaxed">Setiap permintaan yang masuk menuju titik akhir verifikasi dievaluasi terhadap sejumlah parameter: validitas pola sesi, urutan tahap yang wajib berurutan, batas kedaluwarsa, serta konsistensi tautan tujuan dengan identitas sesi. Evaluasi ini dilakukan di sisi server — bukan sekadar penampilan di browser — sehingga pembuatan permintaan manual maupun modifikasi kode klien tidak serta-merta mengubah status verifikasi yang tercatat.</p>
+                <p class="text-zinc-300 leading-relaxed mt-2">Apabila permintaan melanggar urutan atau membawa sesi dari sumber berbeda, server menolaknya dengan kode status yang jelas dan tidak meneruskan informasi tujuan. Pola ini dikenal sebagai <em>server-authoritative gating</em>: halaman hanya bertindak sebagai antarmuka, sementara keputusan akhir seluruhnya berada pada infrastruktur gateway.</p>
+                <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">5. Revalidasi Cache dan Umur Sesuai Perubahan Jaringan</h2>
+                <p class="text-zinc-300 leading-relaxed">Node distribusi secara berkala menandai ulang salinan payload yang disimpan dengan pembanding kriptografis terhadap sumber. Bila ditemukan ketidakcocokan minor (mis. perubahan metadata tanpa mengubah isi), entri lama dimutakhirkan secara transparan dan dipertahankan hingga sumber diverifikasi kembali. Mekanisme ini menjaga keseimbangan antara kecepatan akses dan integritas konten, sekaligus memastikan pengguna tidak pernah menerima berkas yang setengah diperbarui selama proses transit lintas region.</p>
+                <h2 class="text-xs font-bold font-mono text-blue-400 uppercase tracking-wider mt-6 mb-2">6. Isolasi Sandbox Runtime pada Sisi Klien</h2>
+                <p class="text-zinc-300 leading-relaxed">Seluruh instruksi verifikasi yang dijalankan di peramban Anda beroperasi di dalam cakupan halaman yang terisolasi: tidak ada akses ke sumber daya di luar domain gateway, dan skrip iklan pihak ketiga berjalan dalam memori yang terpisah. Isolasi ini meredam dampak bila suatu bagian komponen mengalami gangguan, sehingga satu kegagalan tidak merembet ke seluruh alur sesi Anda.</p>
                 <p class="mt-4 pt-3 border-t border-zinc-800 text-zinc-400 italic">Petunjuk: Klik tombol verifikasi di atas untuk memulai pemindaian tahap kedua. Hasilnya muncul di area bawah halaman.</p>`
         },
         3: {
@@ -472,6 +490,13 @@
                 </div>
                 <h2 class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider mt-6 mb-2">2. Ketentuan Masa Berlaku Sesi Unduhan &amp; Kebijakan Cache</h2>
                 <p class="text-zinc-300 leading-relaxed">Tautan unduhan final akan diantar lewat redirect sekali pakai dari gateway. Setelah sesi verifikasi berakhir, token dibersihkan dari memori cache untuk menjaga keamanan jaringan, dan Anda dapat melakukan verifikasi ulang kapan saja jika membutuhkan berkas kembali.</p>
+                <h2 class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider mt-6 mb-2">3. Jalur Unduhan dengan Pengalihan Bertanda Tangan</h2>
+                <p class="text-zinc-300 leading-relaxed">Pengantaran berkas dilakukan melalui <em>signed redirect</em>: gateway menandai respons pengalihan dengan satu set parameter otorisasi yang hanya valid untuk sesi Anda dan kedaluwarsa setelah dipakai. Alamat tujuan tidak pernah disematkan di dalam berkas halaman maupun di kolom alamat peramban, sehingga informasi tersebut tidak dapat disalin, dibagikan, atau dikoleksi dari sisi klien.</p>
+                <p class="text-zinc-300 leading-relaxed mt-2">Parameter otorisasi diturunkan dari token sesi yang sudah diverifikasi penuh. Bila token kedaluwarsa antar-langkah atau sesi dicegat di tengah proses, gateway menolak pengalihan dan mengarahkan kembali ke halaman verifikasi — mencegah tautan tujuan bocor ke pihak yang belum menyelesaikan seluruh tahap.</p>
+                <h2 class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider mt-6 mb-2">4. Logging Diagnostik Tanpa Data Pengenal</h2>
+                <p class="text-zinc-300 leading-relaxed">Setiap keberhasilan dan kegagalan siklus verifikasi dicatat dalam bentuk agregat dan anonim: jumlah percobaan, durasi tiap tahap, serta kode hasil. Pencatatan ini digunakan untuk pemantauan kesehatan layanan dan tidak berisi alamat IP lengkap, identitas pengunjung, maupun isi berkas. Semua log bersifat transisi dan dimusnahkan sesuai jadwal retensi agar jejak data pengguna tetap seminimal mungkin.</p>
+                <h2 class="text-xs font-bold font-mono text-emerald-400 uppercase tracking-wider mt-6 mb-2">5. Dukungan dan Saran Pemecahan Masalah</h2>
+                <p class="text-zinc-300 leading-relaxed">Bila unduhan tidak dimulai setelah verifikasi lengkap, periksa tiga hal berikut secara berurutan: (1) penyekat iklan atau ekstensi privasi yang mungkin menghambat pengalihan, (2) kebijakan keamanan peramban yang memblokir jendela baru, dan (3) ketersediaan berkas pada penyedia penyimpanan asal. Menonaktifkan sementara penyekat untuk domain ini umumnya menyelesaikan sebagian besar kendala penayangan iklan dan pengalihan.</p>
                 <p class="mt-4 text-emerald-400 font-mono font-bold leading-relaxed">&gt; Klik banner hijau "UNDUH BERKAS SEKARANG" di area bawah untuk langsung memulai pengunduhan file asli Anda.</p>`
         }
     };
