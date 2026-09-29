@@ -128,6 +128,7 @@ assert.equal(res.statusCode, 201, 'buat link harus 201');
 const { id } = res.body.link;
 assert.match(id, lib.ID_RE, 'id harus valid');
 assert.equal(res.body.link.enc, undefined, 'ciphertext tidak boleh bocor ke admin');
+assert.equal(res.body.link.url, TARGET, 'admin bisa melihat URL target (untuk mode edit)');
 assert.equal(res.body.link.status, 'ACTIVE');
 
 res = await call(linksApi, { method: 'POST', body: { name: '', url: TARGET } });
@@ -254,6 +255,19 @@ res = await call(resolveApi, { query: { id, s: 'gar..bag', t: `${lib.newId()}${l
 assert.equal(res.body.gate, 1, 'ticket tanpa sesi valid harus turun ke gate 1');
 
 assert.ok(!/^[A-Za-z0-9_-]{8,64}$/.test('xxx'), 'sanity: ticket harus string panjang');
+
+// --- edit link (PATCH: ganti nama + URL target) ----------------------------
+res = await call(linkApi, { method: 'PATCH', query: { id }, body: { name: 'Revisi.rar', url: 'https://new.example/v2' } });
+assert.equal(res.statusCode, 200, 'edit mustahil gagal');
+assert.equal(res.body.link.name, 'Revisi.rar');
+assert.equal(res.body.link.url, 'https://new.example/v2', 'URL baru terlihat admin untuk keperluan edit');
+assert.equal(res.body.link.enc, undefined, 'edit tetap tidak membocorkan ciphertext');
+
+res = await call(linkApi, { method: 'PATCH', query: { id }, body: { url: 'javascript:evil(1)' } });
+assert.equal(res.statusCode, 400, 'edit URL harus menolak skema berbahaya');
+
+res = await call(linkApi, { method: 'PATCH', query: { id }, body: { url: TARGET, name: 'Contoh File.zip' } });
+assert.equal(res.statusCode, 200, 'kembalikan nama dan URL asli');
 
 // --- status nonaktif --------------------------------------------------------
 res = await call(linkApi, { method: 'PATCH', query: { id }, body: { status: 'PAUSED' } });

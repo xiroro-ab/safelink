@@ -1,4 +1,14 @@
-﻿import { redis, send, fail, kvReady, requireAdmin, loadLink } from '../_lib.js';
+﻿import {
+  redis,
+  send,
+  fail,
+  kvReady,
+  requireAdmin,
+  loadLink,
+  encUrl,
+  decUrl,
+  validateTarget,
+} from '../_lib.js';
 
 export default async function handler(req, res) {
   if (!requireAdmin(req, res)) return;
@@ -8,7 +18,12 @@ export default async function handler(req, res) {
   if (!link) return fail(res, 404, 'Link tidak ditemukan');
 
   if (req.method === 'PATCH') {
-    const { name, size, status } = req.body || {};
+    const { name, size, status, url } = req.body || {};
+    if (url !== undefined) {
+      const target = validateTarget(url, req);
+      if (!target.ok) return fail(res, 400, target.error);
+      link.enc = encUrl(target.url);
+    }
     if (name !== undefined) link.name = String(name).trim().slice(0, 120);
     if (size !== undefined) link.size = String(size).trim().slice(0, 40);
     if (status !== undefined) {
@@ -19,7 +34,7 @@ export default async function handler(req, res) {
     }
     await redis().set(`link:${link.id}`, link);
     const { enc, ...rest } = link;
-    return send(res, 200, { link: rest });
+    return send(res, 200, { link: { ...rest, url: enc ? decUrl(enc) : '' } });
   }
 
   if (req.method === 'DELETE') {

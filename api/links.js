@@ -1,11 +1,12 @@
-﻿import { redis } from './_lib.js';
-import {
+﻿import {
+  redis,
   send,
   fail,
   kvReady,
   hasSecret,
   requireAdmin,
   encUrl,
+  decUrl,
   newId,
   validateTarget,
   loadLink,
@@ -49,7 +50,10 @@ export default async function handler(req, res) {
   return fail(res, 405, 'Method not allowed');
 }
 
+// Endpoint ini hanya untuk admin (requireAdmin di atas). Ciphertext tidak
+// pernah dikirim, tapi URL target didekripsi supaya admin bisa melihat dan
+// mengeditnya.
 function publicShape(link) {
   const { enc, ...rest } = link;
-  return rest;
+  return { ...rest, url: enc ? decUrl(enc) : '' };
 }
