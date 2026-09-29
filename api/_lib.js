@@ -4,15 +4,16 @@ import { Redis } from '@upstash/redis';
 export const TTL_SESSION = 60 * 60;
 export const ID_RE = /^[A-Za-z0-9_-]{4,16}$/;
 
-export const kvReady = () =>
-  Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+// Upstash sendiri menamai variabelnya UPSTASH_REDIS_REST_*; integrasi KV
+// lama di Vercel memakai KV_REST_API_*. Dua-duanya diterima.
+const redisUrl = () => process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const redisToken = () => process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+
+export const kvReady = () => Boolean(redisUrl() && redisToken());
 
 let client;
 export const redis = () =>
-  (client ??= new Redis({
-    url: process.env.KV_REST_API_URL,
-    token: process.env.KV_REST_API_TOKEN,
-  }));
+  (client ??= new Redis({ url: redisUrl(), token: redisToken() }));
 
 /** Test seam: scripts/selfcheck.mjs menyuntik klien Redis palsu ke sini. */
 export const __injectRedis = (fn) => {
