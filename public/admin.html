@@ -330,7 +330,7 @@
                         <div class="border-b border-zinc-800 pb-3 space-y-1">
                             <h3 class="font-mono font-bold text-base text-zinc-100 flex items-center gap-2">
                                 <i data-lucide="dollar-sign" class="w-5 h-5 text-amber-400"></i>
-                                <span>Pengaturan Unit Iklan Adsterra</span>
+                                <span>Pengaturan Unit Iklan (Adsterra + HilltopAds)</span>
                             </h3>
                             <p class="text-xs text-zinc-400 font-mono">
                                 Disimpan di server dan langsung berlaku untuk semua pengunjung. Tidak ada lagi pengaturan iklan di halaman safelink.
@@ -362,10 +362,32 @@
                                     <div class="text-zinc-500">Banner 160×300 tanpa kolom khusus — boleh diabaikan. Cukup isi <b class="text-zinc-300">Header + Middle + Native</b> dulu untuk mulai.</div>
                                 </div>
 
+                                <div class="p-3 bg-zinc-900 border border-blue-500/30 rounded space-y-1.5 text-[11px] leading-relaxed">
+                                    <div class="font-bold text-blue-400 uppercase">Panduan unit HilltopAds</div>
+                                    <div>Di dashboard HilltopAds → <span class="text-zinc-200">Inventory / Ad Formats → Get Code</span>. Lalu padankan:</div>
+                                    <div class="grid grid-cols-2 gap-x-4">
+                                        <div><span class="text-zinc-500">Smartlink</span> → <b class="text-blue-300">Smartlink default</b></div>
+                                        <div><span class="text-zinc-500">Popunder</span> → <b class="text-blue-300">Pop-Under</b></div>
+                                        <div><span class="text-zinc-500">Banner 300×250</span> → <b class="text-blue-300">Middle</b></div>
+                                        <div><span class="text-zinc-500">In-Page Push</span> → <b class="text-blue-300">Native</b></div>
+                                        <div><span class="text-zinc-500">Banner 300×100 (HP)</span> → <b class="text-blue-300">Konten 468×60</b></div>
+                                        <div><span class="text-zinc-500">Video Slider</span> → <b class="text-blue-300">Sticky</b></div>
+                                        <div><span class="text-zinc-500">Banner 728×90</span> → <b class="text-blue-300">Header</b></div>
+                                        <div><span class="text-zinc-500">Video VAST 3.0</span> → <b class="text-red-400">lewati (butuh video player)</b></div>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 bg-emerald-900/20 border border-emerald-500/30 rounded text-[11px] leading-relaxed">
+                                    <div class="font-bold text-emerald-400 uppercase">Cara mencampur Adsterra + HilltopAds</div>
+                                    <div>1. Tiap kolom hanya diisi <b class="text-emerald-300">SATU jaringan</b> — pilih per kolom dari mana Anda ingin. Contoh: Middle &amp; Popunder dari HilltopAds, Header &amp; Native dari Adsterra.</div>
+                                    <div>2. <b class="text-emerald-300">Popunder dan Sticky cuma dari satu jaringan</b> — dua popunder di satu halaman akan di-blokir browser.</div>
+                                    <div>3. Untuk rotasi per gate (mis. gate 2 pakai HilltopAds, gate lain Adsterra), isi <b class="text-emerald-300">kartu GATE 1/2/3</b> di bawah — kolom yang dikosongkan akan memakai default global.</div>
+                                </div>
+
                                 <div>
                                     <label class="block text-zinc-300 font-bold mb-1">Smartlink default (URL)</label>
                                     <input type="url" id="cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
-                                    <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">Smartlink</span> Adsterra — <b>bukan kode skrip, ini URL</b> (contoh: <span class="text-zinc-300">https://www.highratedcpmnetwork.com/smartlink-…</span>). Dibuka otomatis di tab baru saat pengunjung klik verifikasi.</p>
+                                    <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">Smartlink</span> Adsterra atau HilltopAds — <b>bukan kode skrip, ini URL</b> (contoh: <span class="text-zinc-300">https://www.highratedcpmnetwork.com/smartlink-…</span>). Dibuka otomatis di tab baru saat pengunjung klik verifikasi.</p>
                                     <div class="flex items-center gap-3 mt-1 text-zinc-400">
                                         <span class="text-[10px] uppercase">Buka di gate:</span>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-1" class="accent-emerald-500">1</label>
