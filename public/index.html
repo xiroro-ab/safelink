@@ -585,6 +585,30 @@
         }
     }
 
+    // Adsterra kadang tidak menemukan iklan untuk slot tertentu (no-fill).
+    // Slot yang berisi script namun tidak menghasilkan elemen iklan dalam
+    // beberapa detik disembunyikan, supaya tidak ada kotak kosong menggantung.
+    function cleanupEmptyAds() {
+        setTimeout(() => {
+            const hasOutput = (id) => {
+                const el = $(id);
+                return el && Array.from(el.children).some((c) => c.tagName !== 'SCRIPT');
+            };
+            const sections = ['ad-section-header', 'ad-section-footer', 'ad-section-mid',
+                'ad-section-native', 'ad-section-native-2', 'ad-section-sidebar-1', 'ad-section-sidebar-2'];
+            sections.forEach((sid) => {
+                const slot = document.querySelector(`#${sid} [id^="ad-slot-"]`);
+                if (slot && !hasOutput(slot.id)) $(sid).classList.add('hidden');
+            });
+            if (!hasOutput('ad-slot-bottom-action')) {
+                $('ad-slot-bottom-action').classList.add('hidden');
+                $('bottom-layout').classList.add('md:grid-cols-1');
+                $('bottom-layout').classList.remove('md:grid-cols-2');
+            }
+            if (!hasOutput('ad-slot-sticky-bottom')) $('sticky-ad-bar').classList.add('hidden');
+        }, 8000);
+    }
+
     function urlFor(g) {
         const id = encodeURIComponent(state.id);
         const s = encodeURIComponent(state.session);
@@ -797,6 +821,7 @@
         }
 
         applyAds(state.gate);
+        cleanupEmptyAds();
         renderGate(state.gate);
     });
 </script>

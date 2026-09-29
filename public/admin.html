@@ -1010,6 +1010,9 @@
         app.stats = await api('/api/stats');
         renderStats();
         renderOverviewFiles();
+        // Tabel "Kelola File & Link" memakai statistik per file — muat ulang
+        // setelah stats siap, supaya tidak tertinggal di angka 0.
+        renderLinksTable();
     }
 
     async function loadAll() {
