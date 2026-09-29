@@ -345,14 +345,34 @@
                                     <span class="text-[10px] text-zinc-500">dipakai semua gate, bisa ditimpa per gate</span>
                                 </div>
 
+                                <div class="p-3 bg-zinc-900 border border-amber-500/30 rounded space-y-1.5 text-[11px] leading-relaxed">
+                                    <div class="font-bold text-amber-400 uppercase">Cara mencocokkan unit Adsterra Anda</div>
+                                    <div>Buka Adsterra → <span class="text-zinc-200">Publisher area → Websites → Manage</span> → kolom <span class="text-zinc-200">Name/ID</span> unitnya. Lalu padankan:</div>
+                                    <div class="grid grid-cols-2 gap-x-4">
+                                        <div><span class="text-zinc-500">Smartlink_1</span> → kolom <b class="text-amber-300">Smartlink default</b></div>
+                                        <div><span class="text-zinc-500">728x90_1</span> → kolom <b class="text-amber-300">Header</b></div>
+                                        <div><span class="text-zinc-500">300x250_1</span> → kolom <b class="text-amber-300">Middle</b></div>
+                                        <div><span class="text-zinc-500">NativeBanner_1</span> → kolom <b class="text-amber-300">Native</b></div>
+                                        <div><span class="text-zinc-500">SocialBar_1</span> → kolom <b class="text-amber-300">Sticky</b></div>
+                                        <div><span class="text-zinc-500">Popunder_1</span> → kolom <b class="text-amber-300">Pop-Under</b></div>
+                                    </div>
+                                    <div class="text-zinc-500">Sisa unit (468x60_1, 160x300_1, 160x600_1, 320x50_1) bersifat opsional untuk ditimpa di kartu gate.</div>
+                                </div>
+
+                                <div class="text-[10px] text-zinc-500">
+                                    Kode Adsterra berbentuk skrip: <span class="text-emerald-400">&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;</span>. Salin utuh dari tombol <b>Get Code</b> di unit yang bersangkutan — bukan dari Smartlink.
+                                </div>
+
                                 <div>
                                     <label class="block text-zinc-300 font-bold mb-1">Smartlink default (URL)</label>
                                     <input type="url" id="cfg-smartlink" placeholder="https://www.highratedcpmnetwork.com/smartlink-id" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none">
-                                    <div class="flex items-center gap-3 mt-2 text-zinc-400">
+                                    <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">Smartlink_1</span> (contoh ID: 31468268). Bukan kode skrip — ini <b>URL</b> redirect. Dibuka otomatis di tab baru saat pengunjung klik verifikasi.</p>
+                                    <div class="flex items-center gap-3 mt-1 text-zinc-400">
                                         <span class="text-[10px] uppercase">Buka di gate:</span>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-1" class="accent-emerald-500">1</label>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-2" class="accent-emerald-500">2</label>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-sl-gates-3" class="accent-emerald-500">3</label>
+                                        <span class="text-[10px] text-zinc-600">Smartlink dibuka 1x per pengunjung lebih aman dari filter klik berulang.</span>
                                     </div>
                                 </div>
 
@@ -360,25 +380,30 @@
                                     <div>
                                         <label class="block text-zinc-300 font-bold mb-1">Banner 728x90 (header &amp; footer)</label>
                                         <textarea id="cfg-banner-header" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                        <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">728x90_1</span> (31468277). Banner lebar di atas halaman + di footer, semua gate.</p>
                                     </div>
                                     <div>
                                         <label class="block text-zinc-300 font-bold mb-1">Banner 300x250 (tombol bawah, sidebar, konten)</label>
                                         <textarea id="cfg-banner-middle" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                        <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">300x250_1</span> (31468273). Paling strategis: di samping tombol unduh. Dipakai juga di dalam artikel &amp; sidebar.</p>
                                     </div>
                                     <div>
                                         <label class="block text-zinc-300 font-bold mb-1">Native (feed rekomendasi)</label>
                                         <textarea id="cfg-banner-native" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                        <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">NativeBanner_1</span> (31468270). Iklan model artikel sponsor di tengah/bawah halaman ("KONTEN SPONSORED").</p>
                                     </div>
                                     <div>
                                         <label class="block text-zinc-300 font-bold mb-1">Sticky bar bawah</label>
                                         <textarea id="cfg-banner-sticky" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
+                                        <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">SocialBar_1</span> (31468271). Bar menempel di bawah layar. <span class="text-zinc-300">320x50_1</span> (31468276) bisa dijadikan alternatif untuk layar HP.</p>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-zinc-300 font-bold mb-1">Pop-Under</label>
                                     <textarea id="cfg-popunder" rows="3" placeholder="&lt;script type='text/javascript' src='//...'&gt;&lt;/script&gt;" class="w-full bg-zinc-900 border border-zinc-800 rounded p-2.5 text-zinc-200 focus:border-amber-500 focus:outline-none"></textarea>
-                                    <div class="flex items-center gap-3 mt-2 text-zinc-400">
+                                    <p class="text-[10px] text-zinc-500 mt-1">Unit <span class="text-zinc-300">Popunder_1</span> (31468269). Membuka tab iklan diam-diam di belakang halaman. Penyekat iklan sering memblokirnya.</p>
+                                    <div class="flex items-center gap-3 mt-1 text-zinc-400">
                                         <span class="text-[10px] uppercase">Muncul di gate:</span>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-pu-gates-1" class="accent-emerald-500">1</label>
                                         <label class="flex items-center gap-1"><input type="checkbox" id="cfg-pu-gates-2" class="accent-emerald-500">2</label>
@@ -388,6 +413,10 @@
                                 </div>
                             </div>
 
+                            <div class="flex items-center gap-2 text-[11px] text-zinc-500">
+                                <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span><b class="text-zinc-300">Override per gate:</b> isi hanya jika gate itu memakai iklan berbeda dari default (mis. gate 2 pakai banner khusus). <b class="text-zinc-300">Kosongkan = ikut default global.</b> Tidak perlu diisi untuk memulai.</span>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <details class="p-4 bg-zinc-950 border border-zinc-800 rounded">
                                     <summary class="cursor-pointer font-bold text-amber-400">GATE 1 <span class="text-zinc-500 font-mono">(override)</span></summary>
