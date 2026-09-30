@@ -146,7 +146,7 @@
                     <button type="button" onclick="openAddLinkModal()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center gap-2 transition shadow-lg shadow-emerald-950/40">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Tambah Link Baru</span>
                     </button>
-                    <button type="button" onclick="loadAll()" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition" title="Refresh Data">
+                    <button type="button" onclick="refreshAll()" id="btn-refresh" class="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition disabled:opacity-50" title="Refresh Data">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -265,6 +265,9 @@
                                 <option value="ACTIVE">Aktif</option>
                                 <option value="PAUSED">Nonaktif</option>
                             </select>
+                            <button type="button" onclick="refreshAll()" id="btn-refresh-links" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-xs font-bold rounded flex items-center gap-1.5 transition shrink-0 disabled:opacity-50" title="Muat ulang data">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Refresh</span>
+                            </button>
                             <button type="button" onclick="openAddLinkModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold rounded flex items-center gap-1.5 transition shrink-0">
                                 <i data-lucide="plus" class="w-4 h-4"></i><span>Tambah File</span>
                             </button>
@@ -778,8 +781,6 @@
         $('funnel-s1').textContent = `${pct(t.step1)}%`;
         $('funnel-s2').textContent = `${pct(t.step2)}%`;
         $('funnel-s3').textContent = `${pct(t.step3)}%`;
-
-        drawCharts();
     }
 
     function statusBadge(status) {
@@ -1109,6 +1110,21 @@
         // Tabel "Kelola File & Link" memakai statistik per file — muat ulang
         // setelah stats siap, supaya tidak tertinggal di angka 0.
         renderLinksTable();
+        // Chart digambar terakhir: kanvasnya di tab tersembunyi, dan kegagalan
+        // di sini tidak boleh menghalangi tabel link ter-render.
+        drawCharts();
+    }
+
+    async function refreshAll() {
+        const buttons = ['btn-refresh', 'btn-refresh-links'].map($).filter(Boolean);
+        buttons.forEach((b) => { b.disabled = true; });
+        try {
+            await loadAll();
+            showToast('Data terbaru dimuat.', 'success');
+        } finally {
+            buttons.forEach((b) => { b.disabled = false; });
+            icons();
+        }
     }
 
     async function loadAll() {
@@ -1117,7 +1133,6 @@
             app.config = config;
             app.links = links.links;
             renderConfigForm();
-            renderLinksTable();
             await loadStats();
             $('gateway-status').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ONLINE';
             $('gateway-status').className = 'text-emerald-400 flex items-center gap-1';
