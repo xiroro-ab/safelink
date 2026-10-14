@@ -91,7 +91,7 @@
                     <div class="w-9 h-9 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-mono font-bold text-lg shadow-lg shadow-emerald-500/20">/&gt;</div>
                     <div>
                         <div class="font-mono font-bold text-sm tracking-tight text-white">XIRORO<span class="text-emerald-400">_SCRIPT</span></div>
-                        <div class="text-[10px] font-mono text-zinc-500">CONTROL PANEL <span class="text-emerald-400 font-bold ml-1">v3.2</span></div>
+                        <div class="text-[10px] font-mono text-zinc-500">CONTROL PANEL <span class="text-emerald-400 font-bold ml-1">v3.3</span></div>
                     </div>
                 </div>
 
@@ -708,7 +708,7 @@
     </div>
 
     <div id="modal-view-message" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-        <div class="flat-card max-w-lg w-full p-6 space-y-4 border border-zinc-700 font-mono text-xs">
+        <div class="flat-card max-w-xl w-full p-6 space-y-4 border border-zinc-700 font-mono text-xs shadow-2xl animate-[fadeIn_0.15s_ease-out]">
             <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
                 <div class="flex items-center gap-2 font-bold text-white text-sm">
                     <i data-lucide="mail-open" class="w-4 h-4 text-emerald-400"></i>
@@ -724,8 +724,13 @@
                 </div>
                 <div>
                     <div class="text-zinc-500 text-[10px]">PENGIRIM:</div>
-                    <div class="font-bold text-zinc-200" id="msg-modal-sender"></div>
-                    <a id="msg-modal-email-link" href="javascript:void(0)" title="Klik untuk balas via Gmail web" class="text-emerald-400 hover:underline text-[11px] block mt-0.5"></a>
+                    <div class="font-bold text-zinc-200 text-sm" id="msg-modal-sender"></div>
+                    <div class="flex items-center gap-2 mt-1">
+                        <a id="msg-modal-email-link" href="#" target="_blank" rel="noopener noreferrer" title="Buka di Gmail Web" class="text-emerald-400 hover:text-emerald-300 hover:underline text-xs font-mono"></a>
+                        <button type="button" onclick="copySenderEmail()" class="px-2 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded text-[10px] flex items-center gap-1 border border-zinc-700 transition" title="Salin Email">
+                            <i data-lucide="copy" class="w-3 h-3"></i><span>Salin</span>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <div class="text-zinc-500 text-[10px] mb-1">ISI PESAN:</div>
@@ -733,16 +738,16 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between pt-2 border-t border-zinc-800">
-                <button type="button" id="msg-modal-delete-btn" class="px-3.5 py-2 bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-800 rounded transition flex items-center gap-1.5">
+            <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-zinc-800">
+                <button type="button" id="msg-modal-delete-btn" class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/60 rounded-lg transition flex items-center justify-center gap-1.5 text-xs font-bold shrink-0">
                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
                 </button>
-                <div class="flex flex-wrap gap-2 justify-end">
-                    <button type="button" onclick="closeViewMessageModal()" class="px-4 py-2 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 transition">Tutup</button>
-                    <button type="button" onclick="copySenderEmail()" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded flex items-center gap-1.5 transition text-xs" title="Salin Email Pengirim">
+                <div class="flex items-center justify-end gap-2 shrink-0">
+                    <button type="button" onclick="closeViewMessageModal()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-xs font-bold transition">Tutup</button>
+                    <button type="button" onclick="copySenderEmail()" class="px-3.5 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 rounded-lg flex items-center gap-1.5 transition text-xs font-bold whitespace-nowrap" title="Salin Email Pengirim">
                         <i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Salin Email</span>
                     </button>
-                    <a id="msg-modal-reply-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center gap-1.5 transition shadow-lg shadow-emerald-950/40">
+                    <a id="msg-modal-reply-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg flex items-center gap-1.5 transition text-xs shadow-lg shadow-emerald-950/40 whitespace-nowrap">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i><span>Buka di Gmail Web</span>
                     </a>
                 </div>
