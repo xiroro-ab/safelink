@@ -547,6 +547,42 @@
     function injectScript(containerId, html) {
         const container = $(containerId);
         if (!container || !html) return;
+
+        // Jika kode berisi banner Adsterra (variabel atOptions), bungkus ke dalam iframe
+        // terisolasi agar window.atOptions tidak saling menimpa antar-banner di halaman yang sama.
+        if (html.includes('atOptions')) {
+            const wMatch = html.match(/['"]width['"]\s*:\s*(\d+)/);
+            const hMatch = html.match(/['"]height['"]\s*:\s*(\d+)/);
+            const w = wMatch ? parseInt(wMatch[1], 10) : null;
+            const h = hMatch ? parseInt(hMatch[1], 10) : null;
+
+            const iframe = document.createElement('iframe');
+            iframe.style.border = 'none';
+            iframe.style.overflow = 'hidden';
+            iframe.style.background = 'transparent';
+            iframe.scrolling = 'no';
+            iframe.setAttribute('frameBorder', '0');
+            iframe.setAttribute('allowtransparency', 'true');
+
+            if (w && h) {
+                iframe.width = w;
+                iframe.height = h;
+                iframe.style.width = `${w}px`;
+                iframe.style.height = `${h}px`;
+                iframe.style.maxWidth = '100%';
+            } else {
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+            }
+
+            const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:transparent;overflow:hidden;}</style></head><body>${html}</body></html>`;
+            iframe.srcdoc = doc;
+
+            container.innerHTML = '';
+            container.appendChild(iframe);
+            return;
+        }
+
         container.innerHTML = html;
         container.querySelectorAll('script').forEach((old) => {
             const fresh = document.createElement('script');
@@ -585,16 +621,16 @@
 
         const header = g.header || c.bannerHeader || '';
         const middle = g.middle || c.bannerMiddle || '';
-        const native = g.native || c.bannerNative || c.bannerMiddle || '';
-        const konten = g.konten || c.bannerKonten || middle;
-        const halfpage = g.halfpage || c.bannerHalfpage || middle;
-        const sticky = (g.sticky || c.bannerSticky || c.bannerMobile || '').trim();
+        const native = g.native || c.bannerNative || '';
+        const konten = g.konten || c.bannerKonten || '';
+        const halfpage = g.halfpage || c.bannerHalfpage || '';
+        const sticky = (g.sticky || g.mobile || c.bannerSticky || c.bannerMobile || '').trim();
 
         fillSlot('ad-section-header', 'ad-slot-header', header);
         fillSlot('ad-section-footer', 'ad-slot-footer', header);
         fillSlot('ad-section-mid', 'ad-slot-middle-dynamic', konten);
         fillSlot('ad-section-native', 'ad-slot-native', native);
-        fillSlot('ad-section-native-2', 'ad-slot-native-2', native);
+        fillSlot('ad-section-native-2', 'ad-slot-native-2', '');
         fillSlot(null, 'ad-slot-bottom-action', middle);
         fillSlot('ad-section-sidebar-1', 'ad-slot-sidebar-1', middle);
         fillSlot('ad-section-sidebar-2', 'ad-slot-sidebar-2', halfpage);
