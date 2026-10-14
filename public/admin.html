@@ -91,7 +91,7 @@
                     <div class="w-9 h-9 rounded-lg bg-emerald-500 text-zinc-950 flex items-center justify-center font-mono font-bold text-lg shadow-lg shadow-emerald-500/20">/&gt;</div>
                     <div>
                         <div class="font-mono font-bold text-sm tracking-tight text-white">XIRORO<span class="text-emerald-400">_SCRIPT</span></div>
-                        <div class="text-[10px] font-mono text-zinc-500">CONTROL PANEL</div>
+                        <div class="text-[10px] font-mono text-zinc-500">CONTROL PANEL <span class="text-emerald-400 font-bold ml-1">v3.2</span></div>
                     </div>
                 </div>
 
@@ -742,9 +742,9 @@
                     <button type="button" onclick="copySenderEmail()" class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded flex items-center gap-1.5 transition text-xs" title="Salin Email Pengirim">
                         <i data-lucide="copy" class="w-3.5 h-3.5"></i><span>Salin Email</span>
                     </button>
-                    <button type="button" id="msg-modal-reply-btn" onclick="openGmailReply()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center gap-1.5 transition shadow-lg shadow-emerald-950/40">
+                    <a id="msg-modal-reply-btn" href="#" target="_blank" rel="noopener noreferrer" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center gap-1.5 transition shadow-lg shadow-emerald-950/40">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i><span>Buka di Gmail Web</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1382,14 +1382,42 @@
         icons();
     }
 
+    function buildGmailReplyUrl(msg) {
+        if (!msg || !msg.email) return '';
+        const replySubject = 'Re: ' + (msg.subject || 'Pesan Xiroro Script');
+        const dateStr = msg.createdAt ? new Date(msg.createdAt).toLocaleString('id-ID') : '-';
+        const senderName = msg.name || 'Pengunjung';
+        const senderMsg = msg.message || '';
+
+        const emailBody = 
+`Halo ${senderName},
+
+Terima kasih telah menghubungi kami. Kami telah menerima pesan Anda dan berikut tanggapan dari tim Admin Xiroro Script:
+
+[Tulis balasan Anda di sini]
+
+
+
+==================================================
+KUTIPAN PESAN PENGUNJUNG:
+Dari     : ${senderName} (${msg.email})
+Kategori : ${msg.subject || 'Umum'}
+Waktu    : ${dateStr}
+
+Isi Pesan:
+${senderMsg}
+==================================================`;
+
+        return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(msg.email)}&su=${encodeURIComponent(replySubject)}&body=${encodeURIComponent(emailBody)}`;
+    }
+
     function openGmailReply() {
         const msg = app.activeMessage;
         if (!msg || !msg.email) {
             showToast('Alamat email pengirim tidak ditemukan.', 'error');
             return;
         }
-        const replySubject = 'Re: ' + (msg.subject || 'Pesan Xiroro Script');
-        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(msg.email)}&su=${encodeURIComponent(replySubject)}`;
+        const gmailUrl = buildGmailReplyUrl(msg);
         window.open(gmailUrl, '_blank', 'noopener,noreferrer');
     }
 
@@ -1408,16 +1436,19 @@
         if (!msg) return;
 
         app.activeMessage = msg;
+        const gmailUrl = buildGmailReplyUrl(msg);
+
         $('msg-modal-subject').textContent = (msg.subject || 'Detail Pesan').toUpperCase();
         $('msg-modal-date').textContent = new Date(msg.createdAt).toLocaleString('id-ID');
         $('msg-modal-category').textContent = msg.subject || 'Umum';
         $('msg-modal-sender').textContent = msg.name || 'Anonim';
         $('msg-modal-email-link').textContent = msg.email || '-';
-        $('msg-modal-email-link').onclick = (e) => {
-            e.preventDefault();
-            openGmailReply();
-        };
+        $('msg-modal-email-link').href = gmailUrl;
+        $('msg-modal-email-link').target = '_blank';
         $('msg-modal-body').textContent = msg.message || '';
+
+        $('msg-modal-reply-btn').href = gmailUrl;
+        $('msg-modal-reply-btn').target = '_blank';
 
         $('msg-modal-delete-btn').onclick = async () => {
             closeViewMessageModal();
