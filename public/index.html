@@ -75,9 +75,15 @@
                     <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">v5_MULTIGATE</span>
                 </div>
             </a>
-            <div class="flex items-center gap-2 font-mono text-[10px] text-zinc-500 border border-zinc-800 rounded px-2.5 py-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                EDGE ONLINE
+            <div class="flex items-center gap-3">
+                <button type="button" onclick="openContactModal()" class="hidden sm:flex items-center gap-1.5 font-mono text-xs text-zinc-400 hover:text-emerald-400 transition">
+                    <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                    <span>Bantuan</span>
+                </button>
+                <div class="flex items-center gap-2 font-mono text-[10px] text-zinc-500 border border-zinc-800 rounded px-2.5 py-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    EDGE ONLINE
+                </div>
             </div>
         </div>
     </header>
@@ -90,7 +96,147 @@
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- MODE 1: LANDING PAGE RESMI XIRORO SCRIPT (Tampil saat buka https://safelinkk.vercel.app/ tanpa ?id) -->
+        <div id="landing-view" class="space-y-12 hidden">
+            <!-- HERO SECTION -->
+            <section class="text-center max-w-3xl mx-auto space-y-6 pt-2 pb-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>GATEWAY OPERATIONAL &bull; 256-BIT ENCRYPTED</span>
+                </div>
+                
+                <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight font-mono">
+                    Pusat Gateway Berkas &amp; <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Tautan Aman</span>
+                </h1>
+                
+                <p class="text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed max-w-2xl mx-auto">
+                    <strong class="text-zinc-200">Xiroro Script</strong> menyediakan platform perantara unduhan berkas terproteksi. Dilengkapi verifikasi multi-tahap, token soket terenkripsi, dan pemindaian checksum instan untuk memastikan berkas Anda sampai dengan aman dan utuh.
+                </p>
+
+                <!-- INTERACTIVE TOOL: CEK STATUS & VALIDASI LINK SAFELINK -->
+                <div class="flat-card p-5 sm:p-6 text-left max-w-2xl mx-auto border-emerald-500/30 shadow-2xl relative mt-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-zinc-800 font-mono mb-4">
+                        <div class="flex items-center gap-2 font-bold text-white text-xs sm:text-sm">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                            <span>PERIKSA STATUS TAUTAN SAFELINK</span>
+                        </div>
+                        <span class="text-[10px] text-zinc-500">REAL-TIME LOOKUP</span>
+                    </div>
+
+                    <form id="checker-form" onsubmit="checkSafelink(event)" class="space-y-3 font-mono">
+                        <div class="relative">
+                            <input type="text" id="checker-input" placeholder="Masukkan ID Link (cth: bdaf2g) atau URL safelink lengkap..." required class="w-full bg-zinc-950 border border-zinc-700 rounded-lg pl-3.5 pr-28 py-3 text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition">
+                            <button type="submit" id="checker-btn" class="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-md text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-950/40">
+                                <span id="checker-btn-text">Periksa</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5" id="checker-btn-icon"></i>
+                                <svg id="checker-spinner" class="w-3.5 h-3.5 animate-spin hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-zinc-500">Punya tautan dari Xiroro Script? Periksa validitas berkas, status server, dan ukuran file sebelum mengunduh.</p>
+                    </form>
+
+                    <!-- HASIL LOOKUP -->
+                    <div id="checker-result" class="hidden mt-4 pt-4 border-t border-zinc-800/80"></div>
+                </div>
+            </section>
+
+            <!-- LIVE GATEWAY METRICS -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto font-mono">
+                <div class="flat-card p-4 space-y-1.5 border-zinc-800">
+                    <div class="flex items-center justify-between text-zinc-500 text-[11px]">
+                        <span>UPTIME SISTEM</span>
+                        <i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    </div>
+                    <div class="text-xl font-bold text-white">99.98%</div>
+                    <div class="text-[10px] text-emerald-400 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Semua Gate Normal
+                    </div>
+                </div>
+
+                <div class="flat-card p-4 space-y-1.5 border-zinc-800">
+                    <div class="flex items-center justify-between text-zinc-500 text-[11px]">
+                        <span>PROTEKSI ENKRIPSI</span>
+                        <i data-lucide="lock" class="w-3.5 h-3.5 text-blue-400"></i>
+                    </div>
+                    <div class="text-xl font-bold text-white">AES-256</div>
+                    <div class="text-[10px] text-zinc-400">Tokenized Session Vault</div>
+                </div>
+
+                <div class="flat-card p-4 space-y-1.5 border-zinc-800">
+                    <div class="flex items-center justify-between text-zinc-500 text-[11px]">
+                        <span>TAHAPAN VERIFIKASI</span>
+                        <i data-lucide="shield" class="w-3.5 h-3.5 text-amber-400"></i>
+                    </div>
+                    <div class="text-xl font-bold text-white">3-Stage Gate</div>
+                    <div class="text-[10px] text-zinc-400">Anti-Bot &amp; Link Protection</div>
+                </div>
+
+                <div class="flat-card p-4 space-y-1.5 border-zinc-800">
+                    <div class="flex items-center justify-between text-zinc-500 text-[11px]">
+                        <span>JARINGAN PENGIRIMAN</span>
+                        <i data-lucide="zap" class="w-3.5 h-3.5 text-purple-400"></i>
+                    </div>
+                    <div class="text-xl font-bold text-white">&lt; 35ms</div>
+                    <div class="text-[10px] text-zinc-400">Global Cloud Edge Routing</div>
+                </div>
+            </section>
+
+            <!-- CARA KERJA SISTEM VERIFIKASI 3 TAHAP -->
+            <section class="max-w-5xl mx-auto space-y-6">
+                <div class="text-center space-y-2 font-mono">
+                    <h2 class="text-lg sm:text-xl font-bold text-white">CARA KERJA SISTEM VERIFIKASI TAUTAN</h2>
+                    <p class="text-xs text-zinc-400 max-w-xl mx-auto">Setiap tautan yang melewati Xiroro Script diverifikasi melalui alur multi-layer guna mencegah scraping dan bot otomatis.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
+                    <div class="flat-card p-5 space-y-3 border-amber-500/20 hover:border-amber-500/40 transition">
+                        <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                            <span class="font-bold">01</span>
+                        </div>
+                        <h3 class="font-bold text-sm text-white">Inisialisasi Sesi &amp; Soket</h3>
+                        <p class="text-zinc-400 leading-relaxed text-[11px]">Server menerbitkan token sesi acak sementara yang kedaluwarsa dalam 60 menit. Verifikasi awal dilakukan untuk menyaring bot.</p>
+                    </div>
+
+                    <div class="flat-card p-5 space-y-3 border-blue-500/20 hover:border-blue-500/40 transition">
+                        <div class="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+                            <span class="font-bold">02</span>
+                        </div>
+                        <h3 class="font-bold text-sm text-white">Dekripsi Parsial &amp; Tiket</h3>
+                        <p class="text-zinc-400 leading-relaxed text-[11px]">Pengunjung memperoleh tiket kriptografis satu kali pakai. URL asli tetap terkunci dan tidak dapat diakses sebelum seluruh tahapan valid.</p>
+                    </div>
+
+                    <div class="flat-card p-5 space-y-3 border-emerald-500/20 hover:border-emerald-500/40 transition">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                            <span class="font-bold">03</span>
+                        </div>
+                        <h3 class="font-bold text-sm text-white">Rilis Unduhan Asli</h3>
+                        <p class="text-zinc-400 leading-relaxed text-[11px]">Tautan final didekripsi di sisi server dan pengunjung langsung diteruskan ke penyedia penyimpanan berkas resmi (Google Drive, dll).</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BANTUAN & LAPORAN LINK -->
+            <section class="max-w-4xl mx-auto flat-card p-6 sm:p-8 border-zinc-800 text-center space-y-4">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+                    <i data-lucide="life-buoy" class="w-6 h-6"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-base sm:text-lg font-bold text-white font-mono">Menemukan Tautan Rusak atau Kendala Unduhan?</h3>
+                    <p class="text-xs text-zinc-400 max-w-lg mx-auto font-mono">Tim admin Xiroro Script siap membantu. Anda dapat mengirim laporan link mati, pertanyaan kerjasama, atau pengaduan hak cipta kapan saja.</p>
+                </div>
+                <div class="pt-2 flex flex-wrap justify-center gap-3 font-mono text-xs">
+                    <button type="button" onclick="openContactModal('Laporan Link Rusak / Error')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition flex items-center gap-2 shadow-lg shadow-emerald-950/50">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i><span>Kirim Laporan / Hubungi Admin</span>
+                    </button>
+                    <a href="/dmca" class="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg transition flex items-center gap-1.5">
+                        <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i><span>Kebijakan DMCA</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <!-- MODE 2: SAFELINK VERIFICATION (Tampil saat buka tautan dengan ?id=...) -->
+        <div id="safelink-view" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start hidden">
 
             <div class="lg:col-span-8 space-y-8">
 
@@ -722,6 +868,134 @@
         return `/?id=${id}`;
     }
 
+    function initLandingPage(adsConfig) {
+        const landing = $('landing-view');
+        const safelink = $('safelink-view');
+        if (landing) landing.classList.remove('hidden');
+        if (safelink) safelink.classList.add('hidden');
+
+        if (adsConfig) {
+            state.adConfig = adsConfig;
+            const g1 = (adsConfig.gates || {})['1'] || {};
+            const header = g1.header || adsConfig.bannerHeader || '';
+            const sticky = (g1.sticky || g1.mobile || adsConfig.bannerSticky || adsConfig.bannerMobile || '').trim();
+
+            fillSlot('ad-section-header', 'ad-slot-header', header);
+            fillSlot('ad-section-footer', 'ad-slot-footer', header);
+            fillSlot(null, 'ad-slot-sticky-bottom', sticky);
+            $('sticky-ad-bar').classList.toggle('hidden', !sticky);
+
+            const popunder = (g1.popunder || '').trim()
+                || (((adsConfig.popunderGates || []).includes(1)) ? (adsConfig.bannerPopunder || '') : '');
+            if (popunder) {
+                injectScript('adsterra-popunder-container', popunder);
+            }
+        }
+        icons();
+    }
+
+    async function checkSafelink(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const inputEl = $('checker-input');
+        const btn = $('checker-btn');
+        const btnText = $('checker-btn-text');
+        const btnIcon = $('checker-btn-icon');
+        const spinner = $('checker-spinner');
+        const resultBox = $('checker-result');
+
+        let input = (inputEl.value || '').trim();
+        if (!input) return;
+
+        let id = input;
+        try {
+            if (input.includes('://') || input.includes('?')) {
+                const u = new URL(input.startsWith('http') ? input : 'https://' + input);
+                const qId = u.searchParams.get('id');
+                if (qId) id = qId;
+            }
+        } catch {
+            // tetap gunakan id yang ada
+        }
+        id = id.replace(/[^a-zA-Z0-9_-]/g, '');
+
+        if (!id) {
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `
+                <div class="p-3.5 bg-red-500/10 border border-red-500/30 rounded-lg text-xs font-mono text-red-400 flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                    <span>Format ID tautan tidak valid. Masukkan ID atau URL lengkap yang benar.</span>
+                </div>
+            `;
+            icons();
+            return;
+        }
+
+        btn.disabled = true;
+        btnText.textContent = 'Memeriksa...';
+        btnIcon.classList.add('hidden');
+        spinner.classList.remove('hidden');
+
+        try {
+            const res = await fetch(`/api/resolve?id=${encodeURIComponent(id)}`);
+            const data = await res.json().catch(() => ({}));
+
+            resultBox.classList.remove('hidden');
+
+            if (res.ok) {
+                resultBox.innerHTML = `
+                    <div class="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg space-y-3 font-mono">
+                        <div class="flex items-center justify-between text-xs border-b border-emerald-500/20 pb-2">
+                            <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> TAUTAN VALID &amp; AKTIF
+                            </span>
+                            <span class="text-[10px] text-zinc-400">ID: ${data.id || id}</span>
+                        </div>
+                        <div class="space-y-1 text-xs">
+                            <div class="text-zinc-100 font-bold text-sm break-all">${data.name || 'Berkas Terproteksi'}</div>
+                            <div class="text-zinc-400 text-[11px] flex items-center gap-3">
+                                <span>Ukuran: <strong class="text-zinc-200">${data.size || '-'}</strong></span>
+                                <span>&bull;</span>
+                                <span class="text-emerald-400 flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Gateway Ready</span>
+                            </div>
+                        </div>
+                        <div class="pt-1">
+                            <a href="/?id=${encodeURIComponent(data.id || id)}" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xs transition shadow-lg shadow-emerald-950/50">
+                                <span>Buka Halaman Unduhan</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultBox.innerHTML = `
+                    <div class="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg space-y-2 font-mono">
+                        <div class="flex items-center gap-2 text-xs font-bold text-amber-400">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0"></i>
+                            <span>Tautan Tidak Ditemukan atau Sudah Kedaluwarsa</span>
+                        </div>
+                        <p class="text-[11px] text-zinc-400 leading-relaxed">
+                            ${data.error || 'ID tautan ini tidak terdaftar di sistem atau sudah dinonaktifkan.'}
+                        </p>
+                    </div>
+                `;
+            }
+        } catch {
+            resultBox.classList.remove('hidden');
+            resultBox.innerHTML = `
+                <div class="p-3.5 bg-red-500/10 border border-red-500/30 rounded-lg text-xs font-mono text-red-400 flex items-center gap-2">
+                    <i data-lucide="wifi-off" class="w-4 h-4 shrink-0"></i>
+                    <span>Gagal menghubungi server gateway. Periksa koneksi internet Anda.</span>
+                </div>
+            `;
+        } finally {
+            btn.disabled = false;
+            btnText.textContent = 'Periksa';
+            btnIcon.classList.remove('hidden');
+            spinner.classList.add('hidden');
+            icons();
+        }
+    }
+
     function fatal(title, message) {
         $('step-top-action-container').classList.add('hidden');
         $('article-content-container').innerHTML = `
@@ -882,12 +1156,17 @@
         icons();
         $('footer-year').textContent = new Date().getFullYear();
 
-        renderArticle(1);
-
         if (!state.id) {
-            fatal('Link tidak lengkap', 'Buka halaman safelink melalui tautan yang diberikan. Parameter <span class="font-mono text-amber-400">?id=</span> tidak ditemukan pada URL.');
+            const adsResult = await fetch('/api/ads').then((r) => r.json()).catch(() => null);
+            initLandingPage(adsResult);
+            cleanupEmptyAds();
             return;
         }
+
+        $('landing-view').classList.add('hidden');
+        $('safelink-view').classList.remove('hidden');
+
+        renderArticle(1);
 
         const [adsResult, linkResult] = await Promise.allSettled([
             fetch('/api/ads').then((r) => r.json()).catch(() => null),
