@@ -1,4 +1,49 @@
 (function() {
+  function ensureSuccessModal() {
+    let sModal = document.getElementById('global-contact-success-modal');
+    if (sModal) return sModal;
+
+    sModal = document.createElement('div');
+    sModal.id = 'global-contact-success-modal';
+    sModal.className = 'fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden';
+    sModal.innerHTML = `
+      <div class="bg-zinc-900 border border-emerald-500/40 w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center font-sans space-y-4 animate-[fadeIn_0.2s_ease-out]">
+        <div class="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="space-y-1.5">
+          <h3 class="font-bold text-white text-base font-mono">Pesan Berhasil Terkirim!</h3>
+          <p class="text-xs text-zinc-300 leading-relaxed font-mono">
+            Terima kasih telah menghubungi kami. Pesan Anda telah diterima oleh Admin dan akan segera kami proses.
+          </p>
+        </div>
+        <div class="pt-2">
+          <button type="button" id="contact-success-close-btn" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition font-mono text-xs shadow-lg shadow-emerald-950/50">
+            OK, Tutup
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(sModal);
+
+    const closeBtn = document.getElementById('contact-success-close-btn');
+    const closeSuccess = () => sModal.classList.add('hidden');
+    closeBtn.onclick = closeSuccess;
+    sModal.onclick = (e) => {
+      if (e.target === sModal) closeSuccess();
+    };
+
+    return sModal;
+  }
+
+  function showSuccessModal() {
+    const sModal = ensureSuccessModal();
+    sModal.classList.remove('hidden');
+  }
+
   function ensureModal() {
     let modal = document.getElementById('global-contact-modal');
     if (modal) return modal;
@@ -24,18 +69,6 @@
           </button>
         </div>
 
-        <!-- Direct Email Quick Banner -->
-        <div class="px-6 py-2.5 bg-zinc-950/80 border-b border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono shrink-0">
-          <div class="flex items-center gap-1.5 text-zinc-400">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            <span>Email Admin Langsung:</span>
-          </div>
-          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=biscuit.yummy69@gmail.com&su=Kontak%20Admin%20-%20Xiroro%20Script" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-bold underline transition flex items-center gap-1" title="Buka Gmail untuk mengirim email ke biscuit.yummy69@gmail.com">
-            <span>biscuit.yummy69@gmail.com</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
-        </div>
-
         <!-- Body Form -->
         <form id="contact-modal-form" class="p-6 space-y-4 overflow-y-auto font-mono text-xs">
           <div id="contact-alert" class="hidden p-3 rounded text-xs"></div>
@@ -48,7 +81,7 @@
           <div>
             <label class="block text-zinc-300 font-bold mb-1">Alamat Email Anda *</label>
             <input type="email" id="contact-input-email" required maxlength="100" placeholder="nama@gmail.com" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-zinc-200 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition">
-            <p class="text-[10px] text-zinc-500 mt-1">Admin dapat membalas pesan Anda ke alamat email ini.</p>
+            <p class="text-[10px] text-zinc-500 mt-1">Admin akan membalas pesan Anda ke alamat email yang Anda masukkan di sini.</p>
           </div>
 
           <div>
@@ -121,14 +154,9 @@
           throw new Error(data.error || 'Gagal mengirim pesan.');
         }
 
-        alertBox.className = 'p-3 rounded text-xs bg-emerald-950/80 border border-emerald-700 text-emerald-200 block';
-        alertBox.textContent = '✓ ' + (data.message || 'Pesan Anda berhasil terkirim ke Admin!');
         form.reset();
-
-        setTimeout(() => {
-          closeModal();
-          alertBox.className = 'hidden';
-        }, 2200);
+        closeModal();
+        showSuccessModal();
       } catch (err) {
         alertBox.className = 'p-3 rounded text-xs bg-red-950/80 border border-red-700 text-red-200 block';
         alertBox.textContent = '✕ ' + err.message;
