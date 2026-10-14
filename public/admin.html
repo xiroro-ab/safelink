@@ -102,6 +102,12 @@
                     <button type="button" onclick="switchTab('tab-links')" id="nav-tab-links" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
                         <i data-lucide="link" class="w-4 h-4"></i><span>Kelola File &amp; Link</span>
                     </button>
+                    <button type="button" onclick="switchTab('tab-inbox')" id="nav-tab-inbox" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center justify-between transition">
+                        <div class="flex items-center gap-2.5">
+                            <i data-lucide="inbox" class="w-4 h-4"></i><span>Pesan Masuk</span>
+                        </div>
+                        <span id="badge-unread-count" class="hidden px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold font-mono">0</span>
+                    </button>
                     <button type="button" onclick="switchTab('tab-analytics')" id="nav-tab-analytics" class="w-full text-left px-3 py-2.5 rounded text-zinc-400 hover:text-white hover:bg-zinc-800/60 flex items-center gap-2.5 transition">
                         <i data-lucide="line-chart" class="w-4 h-4"></i><span>Grafik &amp; Analitik</span>
                     </button>
@@ -560,6 +566,50 @@
                     </div>
                 </div>
 
+                <div id="tab-inbox" class="space-y-6 hidden fade-in">
+                    <div class="flat-card p-5 space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 pb-3">
+                            <div>
+                                <h3 class="font-mono font-bold text-sm text-zinc-100 flex items-center gap-2">
+                                    <i data-lucide="mail" class="w-4 h-4 text-emerald-400"></i>
+                                    <span>Pesan Masuk dari Pengunjung</span>
+                                </h3>
+                                <p class="text-xs text-zinc-500 font-mono">Pesan formulir kontak, pengaduan DMCA, atau laporan link dari website</p>
+                            </div>
+                            <div class="flex items-center gap-3 font-mono text-xs">
+                                <div>
+                                    <span class="text-zinc-500">Total: </span>
+                                    <span id="inbox-total-count" class="text-emerald-400 font-bold">0 Pesan</span>
+                                </div>
+                                <button type="button" onclick="loadInbox()" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition flex items-center gap-1.5 text-xs">
+                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                    <span>Refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-mono text-xs">
+                                <thead>
+                                    <tr class="border-b border-zinc-800 text-zinc-500 uppercase text-[11px]">
+                                        <th class="pb-2.5 pl-2">Status</th>
+                                        <th class="pb-2.5">Waktu</th>
+                                        <th class="pb-2.5">Pengirim</th>
+                                        <th class="pb-2.5">Kategori</th>
+                                        <th class="pb-2.5">Pesan</th>
+                                        <th class="pb-2.5 pr-2 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inbox-tbody" class="divide-y divide-zinc-800/60 text-zinc-300">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-8 text-zinc-500">Belum ada pesan masuk.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </main>
         </div>
     </div>
@@ -651,6 +701,46 @@
         </div>
     </div>
 
+    <div id="modal-view-message" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="flat-card max-w-lg w-full p-6 space-y-4 border border-zinc-700 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div class="flex items-center gap-2 font-bold text-white text-sm">
+                    <i data-lucide="mail-open" class="w-4 h-4 text-emerald-400"></i>
+                    <span id="msg-modal-subject">DETAIL PESAN</span>
+                </div>
+                <button type="button" onclick="closeViewMessageModal()" class="text-zinc-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="space-y-3 bg-zinc-950 p-4 rounded border border-zinc-800">
+                <div class="flex justify-between items-center text-[11px] text-zinc-500 border-b border-zinc-900 pb-2">
+                    <div>Waktu: <span id="msg-modal-date" class="text-zinc-300"></span></div>
+                    <span id="msg-modal-category" class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px]"></span>
+                </div>
+                <div>
+                    <div class="text-zinc-500 text-[10px]">PENGIRIM:</div>
+                    <div class="font-bold text-zinc-200" id="msg-modal-sender"></div>
+                    <a id="msg-modal-email-link" href="#" class="text-emerald-400 hover:underline text-[11px] block mt-0.5"></a>
+                </div>
+                <div>
+                    <div class="text-zinc-500 text-[10px] mb-1">ISI PESAN:</div>
+                    <div id="msg-modal-body" class="p-3 bg-zinc-900/80 rounded border border-zinc-800 text-zinc-300 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-zinc-800">
+                <button type="button" id="msg-modal-delete-btn" class="px-3.5 py-2 bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-800 rounded transition flex items-center gap-1.5">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i><span>Hapus</span>
+                </button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeViewMessageModal()" class="px-4 py-2 bg-zinc-800 text-zinc-300 rounded">Tutup</button>
+                    <a id="msg-modal-reply-btn" href="#" target="_blank" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded flex items-center gap-1.5 transition">
+                        <i data-lucide="reply" class="w-3.5 h-3.5"></i><span>Balas via Email</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <script>
     const $ = (id) => document.getElementById(id);
     const icons = () => { if (window.lucide?.createIcons) lucide.createIcons(); };
@@ -659,6 +749,7 @@
         links: [],
         config: {},
         stats: { totals: {}, files: [], series: [] },
+        messages: [],
         pendingDelete: null,
     };
     let charts = {};
@@ -747,7 +838,7 @@
     const fmt = (v) => Number(v || 0).toLocaleString('id-ID');
 
     function switchTab(tabId) {
-        ['tab-overview', 'tab-links', 'tab-analytics', 'tab-ads', 'tab-settings'].forEach((id) => {
+        ['tab-overview', 'tab-links', 'tab-inbox', 'tab-analytics', 'tab-ads', 'tab-settings'].forEach((id) => {
             $(id)?.classList.add('hidden');
             $('nav-' + id)?.classList.remove('tab-active');
         });
@@ -756,13 +847,14 @@
         const titles = {
             'tab-overview': 'DASHBOARD OVERVIEW',
             'tab-links': 'KELOLA FILE & LINK SAFELINK',
+            'tab-inbox': 'KOTAK MASUK (PESAN PENGUNJUNG)',
             'tab-analytics': 'GRAFIK & ANALITIK TRAFIK',
             'tab-ads': 'MONETISASI ADSTERRA',
             'tab-settings': 'PENGATARAN SISTEM',
         };
         $('page-title-display').querySelector('span').textContent = titles[tabId] || 'ADMIN';
 
-        // Kanvas di tab tersembunyi berukuran 0, jadi Chart.js harus menggambar ulang.
+        if (tabId === 'tab-inbox') loadInbox();
         if (tabId === 'tab-analytics') requestAnimationFrame(drawCharts);
     }
 
@@ -1127,6 +1219,117 @@
         }
     }
 
+    async function loadInbox() {
+        try {
+            const data = await api('/api/contact');
+            app.messages = data.messages || [];
+            renderInbox();
+        } catch (err) {
+            console.error('Gagal memuat pesan inbox:', err);
+        }
+    }
+
+    function renderInbox() {
+        const tbody = $('inbox-tbody');
+        const countEl = $('inbox-total-count');
+        const badge = $('badge-unread-count');
+        const msgs = app.messages || [];
+
+        const unreadCount = msgs.filter((m) => !m.read).length;
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+
+        countEl.textContent = `${msgs.length} Pesan`;
+
+        if (!msgs.length) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-zinc-500 font-mono">Belum ada pesan masuk dari pengunjung.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = msgs.map((m) => {
+            const dateStr = new Date(m.createdAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+            const preview = (m.message || '').replace(/</g, '&lt;').slice(0, 40) + ((m.message || '').length > 40 ? '...' : '');
+            const statusHtml = m.read
+                ? '<span class="text-[10px] text-zinc-500 font-bold">DIBACA</span>'
+                : '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">BARU</span>';
+
+            const catClass = m.subject?.includes('DMCA') ? 'text-red-400 bg-red-950/40 border-red-900/60'
+                : m.subject?.includes('Error') ? 'text-amber-400 bg-amber-950/40 border-amber-900/60'
+                : 'text-zinc-300 bg-zinc-900 border-zinc-800';
+
+            return `
+                <tr class="hover:bg-zinc-900/40 transition cursor-pointer" onclick="openViewMessage('${m.id}')">
+                    <td class="py-3 pl-2">${statusHtml}</td>
+                    <td class="py-3 text-zinc-400 whitespace-nowrap text-[11px]">${dateStr}</td>
+                    <td class="py-3">
+                        <div class="font-bold text-zinc-200">${(m.name || 'Anonim').replace(/</g, '&lt;')}</div>
+                        <div class="text-[11px] text-zinc-500">${(m.email || '').replace(/</g, '&lt;')}</div>
+                    </td>
+                    <td class="py-3">
+                        <span class="px-2 py-0.5 rounded border text-[10px] ${catClass}">${(m.subject || 'Umum').replace(/</g, '&lt;')}</span>
+                    </td>
+                    <td class="py-3 text-zinc-400 max-w-xs truncate text-[11px]">${preview}</td>
+                    <td class="py-3 pr-2 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+                        <button type="button" onclick="openViewMessage('${m.id}')" class="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded text-[11px] mr-1">Buka</button>
+                        <button type="button" onclick="deleteInboxMessage('${m.id}')" class="px-2 py-1 bg-red-950/60 hover:bg-red-900 text-red-300 border border-red-900/60 rounded text-[11px]" title="Hapus"><i data-lucide="trash-2" class="w-3.5 h-3.5 inline"></i></button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        icons();
+    }
+
+    async function openViewMessage(id) {
+        const msg = (app.messages || []).find((m) => m.id === id);
+        if (!msg) return;
+
+        $('msg-modal-subject').textContent = (msg.subject || 'Detail Pesan').toUpperCase();
+        $('msg-modal-date').textContent = new Date(msg.createdAt).toLocaleString('id-ID');
+        $('msg-modal-category').textContent = msg.subject || 'Umum';
+        $('msg-modal-sender').textContent = msg.name || 'Anonim';
+        $('msg-modal-email-link').textContent = msg.email || '-';
+        $('msg-modal-email-link').href = `mailto:${encodeURIComponent(msg.email)}?subject=Re: ${encodeURIComponent(msg.subject || 'Pesan Safelink')}`;
+        $('msg-modal-body').textContent = msg.message || '';
+        $('msg-modal-reply-btn').href = `mailto:${encodeURIComponent(msg.email)}?subject=Re: ${encodeURIComponent(msg.subject || 'Pesan Safelink')}`;
+
+        $('msg-modal-delete-btn').onclick = async () => {
+            closeViewMessageModal();
+            await deleteInboxMessage(id);
+        };
+
+        $('modal-view-message').classList.remove('hidden');
+        icons();
+
+        if (!msg.read) {
+            msg.read = true;
+            renderInbox();
+            try {
+                await api(`/api/contact?id=${encodeURIComponent(id)}`, { method: 'PATCH' });
+            } catch {}
+        }
+    }
+
+    function closeViewMessageModal() {
+        $('modal-view-message').classList.add('hidden');
+    }
+
+    async function deleteInboxMessage(id) {
+        if (!confirm('Yakin ingin menghapus pesan ini?')) return;
+        try {
+            await api(`/api/contact?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+            app.messages = (app.messages || []).filter((m) => m.id !== id);
+            renderInbox();
+            showToast('Pesan berhasil dihapus.', 'success');
+        } catch (err) {
+            showToast(err.message || 'Gagal menghapus pesan.', 'error');
+        }
+    }
+
     async function loadAll() {
         try {
             const [config, links] = await Promise.all([api('/api/ads'), api('/api/links')]);
@@ -1134,6 +1337,7 @@
             app.links = links.links;
             renderConfigForm();
             await loadStats();
+            await loadInbox();
             $('gateway-status').innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ONLINE';
             $('gateway-status').className = 'text-emerald-400 flex items-center gap-1';
         } catch (err) {

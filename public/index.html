@@ -374,13 +374,16 @@
     <footer class="border-t border-zinc-800 bg-zinc-950 py-6 text-xs text-zinc-500 font-mono">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>&copy; <span id="footer-year"></span> Xiroro Script. ALL RIGHTS RESERVED.</div>
-            <div class="flex gap-4">
+            <div class="flex items-center gap-4">
                 <a href="/privacy" class="hover:text-zinc-300">PRIVACY</a>
                 <a href="/terms" class="hover:text-zinc-300">TERMS</a>
                 <a href="/dmca" class="hover:text-zinc-300">DMCA</a>
+                <button type="button" onclick="openContactModal()" class="text-emerald-400 hover:text-emerald-300 font-bold">KONTAK</button>
             </div>
         </div>
     </footer>
+
+    <script src="/contact-modal.js"></script>
 
 <script>
     const $ = (id) => document.getElementById(id);
