@@ -133,6 +133,9 @@
                 <a href="/" target="_blank" rel="noopener" class="w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded flex items-center justify-center gap-2 transition text-xs">
                     <i data-lucide="external-link" class="w-3.5 h-3.5"></i><span>Buka Halaman Safelink</span>
                 </a>
+                <button type="button" onclick="doLogout()" class="w-full py-2 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-900/40 rounded flex items-center justify-center gap-2 transition text-xs">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i><span>Keluar (Logout)</span>
+                </button>
             </div>
         </aside>
 
@@ -581,7 +584,7 @@
                                     <span class="text-zinc-500">Total: </span>
                                     <span id="inbox-total-count" class="text-emerald-400 font-bold">0 Pesan</span>
                                 </div>
-                                <button type="button" onclick="loadInbox()" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition flex items-center gap-1.5 text-xs">
+                                <button type="button" onclick="refreshAll()" id="btn-refresh-inbox" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded transition flex items-center gap-1.5 text-xs disabled:opacity-50" title="Segarkan semua data">
                                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                                     <span>Refresh</span>
                                 </button>
@@ -753,7 +756,7 @@
         pendingDelete: null,
     };
     let charts = {};
-    let authHeader = null;
+    let authHeader = sessionStorage.getItem('admin_auth') || null;
 
     const setAuthError = (message) => {
         $('login-error').textContent = message;
@@ -770,6 +773,12 @@
         $('login-screen').classList.add('hidden');
     }
 
+    function doLogout() {
+        authHeader = null;
+        sessionStorage.removeItem('admin_auth');
+        showLogin('Anda telah berhasil keluar (logout).');
+    }
+
     async function doLogin(event) {
         event.preventDefault();
         const user = $('login-user').value.trim();
@@ -779,15 +788,18 @@
         const btn = $('login-btn');
         btn.disabled = true;
         setAuthError('Memeriksa kredensial...');
-        authHeader = 'Basic ' + btoa(`${user}:${pass}`);
+        const tempAuth = 'Basic ' + btoa(`${user}:${pass}`);
 
         try {
+            authHeader = tempAuth;
             await api('/api/links');
+            sessionStorage.setItem('admin_auth', tempAuth);
             setAuthError('');
             hideLogin();
             await loadAll();
         } catch (err) {
             authHeader = null;
+            sessionStorage.removeItem('admin_auth');
             setAuthError(err.message === 'Unauthorized' ? 'Username atau password salah.' : err.message);
         } finally {
             btn.disabled = false;
@@ -804,6 +816,7 @@
         });
         if (res.status === 401) {
             authHeader = null;
+            sessionStorage.removeItem('admin_auth');
             showLogin('Sesi login habis. Silakan masuk kembali.');
             throw new Error('Unauthorized');
         }
@@ -1208,13 +1221,24 @@
     }
 
     async function refreshAll() {
-        const buttons = ['btn-refresh', 'btn-refresh-links'].map($).filter(Boolean);
-        buttons.forEach((b) => { b.disabled = true; });
+        const buttons = ['btn-refresh', 'btn-refresh-links', 'btn-refresh-inbox'].map($).filter(Boolean);
+        buttons.forEach((b) => {
+            b.disabled = true;
+            b.querySelectorAll('svg, i').forEach((icon) => icon.classList.add('animate-spin'));
+        });
+        const startTime = Date.now();
         try {
             await loadAll();
-            showToast('Data terbaru dimuat.', 'success');
+            const elapsed = Date.now() - startTime;
+            if (elapsed < 400) await new Promise((r) => setTimeout(r, 400 - elapsed));
+            showToast('✓ Data berhasil diperbarui!', 'success');
+        } catch (err) {
+            showToast(err.message || 'Gagal memperbarui data.', 'error');
         } finally {
-            buttons.forEach((b) => { b.disabled = false; });
+            buttons.forEach((b) => {
+                b.disabled = false;
+                b.querySelectorAll('svg, i').forEach((icon) => icon.classList.remove('animate-spin'));
+            });
             icons();
         }
     }
@@ -1347,9 +1371,14 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
         icons();
-        showLogin();
+        if (authHeader) {
+            hideLogin();
+            await loadAll();
+        } else {
+            showLogin();
+        }
     });
 
     const openAddLinkModal = () => $('modal-add-link').classList.remove('hidden');
