@@ -24,6 +24,18 @@
           </button>
         </div>
 
+        <!-- Direct Email Quick Banner -->
+        <div class="px-6 py-2.5 bg-zinc-950/80 border-b border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono shrink-0">
+          <div class="flex items-center gap-1.5 text-zinc-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span>Email Admin Langsung:</span>
+          </div>
+          <a href="https://mail.google.com/mail/?view=cm&fs=1&to=biscuit.yummy69@gmail.com&su=Kontak%20Admin%20-%20Xiroro%20Script" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:text-emerald-300 font-bold underline transition flex items-center gap-1" title="Buka Gmail untuk mengirim email ke biscuit.yummy69@gmail.com">
+            <span>biscuit.yummy69@gmail.com</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
         <!-- Body Form -->
         <form id="contact-modal-form" class="p-6 space-y-4 overflow-y-auto font-mono text-xs">
           <div id="contact-alert" class="hidden p-3 rounded text-xs"></div>
